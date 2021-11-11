@@ -88,6 +88,7 @@ def dfsMazeHelper(board, row, col, visited):
             newRow = row + drow
             newCol = col + dcol
             if isLegalMove(board, newRow, newCol, visited):
+                print2dList(board)
                 board[newRow][newCol] = 0
                 visited.add((newRow, newCol))
                 repr2dList(board)
@@ -148,7 +149,7 @@ def recursiveDivisionMaze(board, row, col, numRows, numCols, direction):
 
 
 def runCode():
-    rows = cols = 10
+    rows = cols = 5
     
 
     # board = [[0]*cols for _ in range(rows)]
