@@ -1,6 +1,7 @@
 import random
 from cmu_112_graphics import *
 
+#Idea for graph class (and some funcitons) from Graph Algorithm Mini-Lecture
 class Graph():
     def __init__(self):
         self.table = {}
@@ -21,21 +22,31 @@ class Graph():
     
     #dfs
     def getPath(self, nodeA, nodeB):
-        return self.getPathHelper(nodeA, nodeB, dict())
+        path = self.getPathHelper(nodeA, nodeB, dict())
+        newPath = {}
+        #ASK KIAN ABOUT WHY MY DFS HAS THE NONES IN IT
+        for node in path:
+            if path[node] != None:
+                newPath[node] = path[node]
+
+        return newPath
 
     def getPathHelper(self, nodeA, nodeB, visited):
         if nodeA == nodeB:
             return visited
         else:
             visited[nodeA] = None
+            #Search neighbors
             for neighbor in self.getNeighbors(nodeA):
                 if neighbor not in visited:
+                    
                     visited[nodeA] = neighbor
                     result = self.getPathHelper(neighbor, nodeB, visited)
                     if result != None:
                         return result
-            if visited[nodeA] == None:
-                visited.pop(nodeA)
+
+                    #If we get nowhere, backtrack
+                    visited.pop(nodeA)
             return None
 
 class Maze(Graph):
@@ -46,6 +57,8 @@ class Maze(Graph):
                 return True
         return False
 
+
+    #Idea for Maze Generation from https://en.wikipedia.org/wiki/Maze_generation_algorithm
     #Makes a dfs Maze
     def dfsMaze(self, rows, cols):
         self.rows = rows
