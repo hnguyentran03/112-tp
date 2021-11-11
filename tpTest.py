@@ -57,6 +57,7 @@ class Maze(Graph):
             return self
         else:
             #Randomized moves
+            visited.add((row, col))
             moves = [(0,1), (0,-1), (1, 0), (-1, 0)]
             random.shuffle(moves)
             for move in moves:
@@ -67,7 +68,6 @@ class Maze(Graph):
                 if self.isLegalMove(newRow, newCol, visited):
                     #Makes a path between the two
                     self.addEdge((row, col), (newRow, newCol))
-                    visited.add((newRow, newCol))
                     result = self.dfsMazeHelper(newRow, newCol, visited)
                     if result != None:
                         return result
