@@ -1,4 +1,4 @@
-from tpTest import *
+from graph import *
 
 def appStarted(app):
     generateMaze(app)
