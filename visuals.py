@@ -6,7 +6,7 @@ def appStarted(app):
     pass
 
 def generateMaze(app):
-    rows = cols = 20
+    rows = cols = 10
     app.margin = 10
     app.maze = Maze()
     app.maze.dfsMaze(rows, cols)
@@ -33,7 +33,6 @@ def drawCell(app, canvas, row, col, color = 'white'):
 
 def drawPath(app, canvas):
     path = app.maze.getPath((0, 0), (app.maze.rows - 1, app.maze.cols - 1))
-
     for row, col in app.maze.table:
         if (row, col) in path:
             color = 'blue'
@@ -71,8 +70,7 @@ def redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill = 'black')
     drawMaze(app, canvas)
     drawEdges(app, canvas)
-    # drawPath(app, canvas)
-    pass
+    drawPath(app, canvas)
 
 
 runApp(width=500,height=500)
