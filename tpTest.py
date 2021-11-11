@@ -71,63 +71,6 @@ class Maze(Graph):
                         return result
             return None
 
-'''
-class Cell():
-    def __init__(self, row, col):
-        self.row = row
-        self.col = col
-
-    def __repr__(self):
-        return f'Cell({self.row}, {self.col})'
-
-#2DList
-def makeBoard(rows, cols):
-    board = [[None]*cols for _ in range(rows)]
-    
-    for row in range(rows):
-        for col in range(cols):
-            board[row][col] = Cell(row, col)
-'''
-
-
-# #Dictionary
-# def generalMaze(rows, cols):
-#     maze = Graph()
-#     for row in range(rows):
-#         for col in range(cols):
-#             maze.table[(row, col)] = dict()
-#     return maze
-
-# def isLegalMove(maze, row, col, visited):
-#     numRows = 10
-#     numCols = 10
-#     if 0 <= row < numRows and 0 <= col < numCols:
-#         if (row, col) not in visited:
-#             return True
-#     return False
-
-# def dfsMaze(rows, cols):
-#     maze = generalMaze(rows, cols)
-#     return dfsMazeHelper(maze, 0, 0, visited=set())
-
-# def dfsMazeHelper(maze, row, col, visited):
-#     if len(visited) == 10*10:
-#         return maze
-#     else:
-#         moves = [(0,1), (0,-1), (1, 0), (-1, 0)]
-#         random.shuffle(moves)
-#         for move in moves:
-#             drow, dcol = move
-#             newRow = row + drow
-#             newCol = col + dcol
-#             if isLegalMove(maze, newRow, newCol, visited):
-#                 maze.addEdge((row, col), (newRow, newCol))
-#                 visited.add((newRow, newCol))
-#                 result = dfsMazeHelper(maze, newRow, newCol, visited)
-#                 if result != None:
-#                     return result
-#         return None
-
 def main():
     rows = cols = 10
     maze = Maze()
@@ -138,5 +81,5 @@ def main():
 
 main()
 
-    
+
 
