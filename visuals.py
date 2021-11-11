@@ -1,32 +1,19 @@
 from tpTest import *
 
+def appStarted(app):
+    generateMaze(app)
+    pass
+
 def generateMaze(app):
     rows = cols = 10
     app.margin = 5
     app.maze = Maze()
     app.maze.dfsMaze(rows, cols)
 
-def drawMaze(app, canvas):
-    for row, col in app.maze.table:
-        drawCell(app, canvas, row, col)
-    pass
 
-def drawCell(app, canvas, row, col, color = 'white'):
-    x0, x1, y0, y1 = getCellBounds(app, row, col)
-    canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
-
-def drawPath(app, canvas):
-    path = app.maze.getPath((0, 0), (app.maze.rows - 1, app.maze.cols - 1))
-    print(path)
-    for row, col in app.maze.table:
-        if (row, col) in path:
-            color = 'blue'
-        else:
-            color = 'white'
-
-        drawCell(app, canvas, row, col, color)
-    
-
+'''
+Draw
+'''
 def getCellBounds(app, row, col):
     #Taken from 112 Notes/Lecture
     gridWidth  = app.width - 2*app.margin
@@ -42,6 +29,21 @@ def getCellBounds(app, row, col):
     x1 -= 5
     y1 -= 5
     return x0, x1, y0, y1
+            
+def drawCell(app, canvas, row, col, color = 'white'):
+    x0, x1, y0, y1 = getCellBounds(app, row, col)
+    canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
+
+def drawPath(app, canvas):
+    path = app.maze.getPath((0, 0), (app.maze.rows - 1, app.maze.cols - 1))
+
+    for row, col in app.maze.table:
+        if (row, col) in path:
+            color = 'blue'
+        else:
+            color = 'white'
+
+        drawCell(app, canvas, row, col, color)
 
 def drawEdges(app, canvas):
     for row, col in app.maze.table:
@@ -49,12 +51,22 @@ def drawEdges(app, canvas):
             pathRow = (row + neighborRow) / 2
             pathCol = (col + neighborCol) / 2
             drawCell(app, canvas, pathRow, pathCol)
-            
 
-def appStarted(app):
-    generateMaze(app)
+def drawMaze(app, canvas):
+    for row, col in app.maze.table:
+        drawCell(app, canvas, row, col)
+
+
+'''
+Movement
+'''
+def mousePressed(app, event):
     pass
 
+
+'''
+Timer
+'''
 def timerFired(app):
     pass
 
