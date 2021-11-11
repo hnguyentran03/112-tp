@@ -1,4 +1,6 @@
 import random
+from cmu_112_graphics import *
+
 class Graph():
     def __init__(self):
         self.table = {}
@@ -71,6 +73,8 @@ class Maze(Graph):
                         return result
             return None
 
+
+#TEST CODE
 def main():
     rows = cols = 10
     maze = Maze()
@@ -79,7 +83,10 @@ def main():
     print()
     print(maze.getPath((0,0),(9,9)))
 
-main()
+# main()
+
+
+
 
 
 
