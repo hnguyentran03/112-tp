@@ -2,11 +2,12 @@ from graph import *
 
 def appStarted(app):
     generateMaze(app)
+    app.cellMargin = 5
     pass
 
 def generateMaze(app):
-    rows = cols = 10
-    app.margin = 5
+    rows = cols = 20
+    app.margin = 10
     app.maze = Maze()
     app.maze.dfsMaze(rows, cols)
 
@@ -20,14 +21,10 @@ def getCellBounds(app, row, col):
     gridHeight = app.height - 2*app.margin
     cellWidth = gridWidth / app.maze.cols
     cellHeight = gridHeight / app.maze.rows
-    x0 = app.margin + col * cellWidth
-    x1 = app.margin + (col+1) * cellWidth
-    y0 = app.margin + row * cellHeight
-    y1 = app.margin + (row+1) * cellHeight
-    x0 += 5
-    y0 += 5
-    x1 -= 5
-    y1 -= 5
+    x0 = app.margin + col * cellWidth + app.cellMargin
+    x1 = app.margin + (col+1) * cellWidth - app.cellMargin
+    y0 = app.margin + row * cellHeight + app.cellMargin
+    y1 = app.margin + (row+1) * cellHeight - app.cellMargin
     return x0, x1, y0, y1
             
 def drawCell(app, canvas, row, col, color = 'white'):
