@@ -4,18 +4,28 @@ def appStarted(app):
     generateMaze(app)
     app.cellMargin = 5
     app.path = False
+    app.player = (20, 20)
     pass
 
 def generateMaze(app):
-    rows = cols = 10
+    rows = cols = 30
     app.margin = 10
     app.maze = Maze()
     app.maze.dfsMaze(rows, cols)
 
-
 '''
 Draw
 '''
+def checkPlayerLocation(app):
+    cx, cy = app.player
+    gridWidth  = app.width - 2*app.margin
+    gridHeight = app.height - 2*app.margin
+    cellWidth = gridWidth / app.maze.cols
+    cellHeight = gridHeight / app.maze.rows
+    col = (cx - app.margin - app.cellMargin)/(cellWidth)
+    row = (cy - app.margin - app.cellMargin)/(cellHeight)
+    return int(row), int(col)
+
 def getCellBounds(app, row, col):
     #Taken from 112 Notes/Lecture
     gridWidth  = app.width - 2*app.margin
@@ -33,14 +43,17 @@ def drawCell(app, canvas, row, col, color = 'white'):
     canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
 
 def drawPath(app, canvas):
-    path = app.maze.getPath((0, 0), (app.maze.rows - 1, app.maze.cols - 1))
-    for row, col in app.maze.table:
-        if (row, col) in path:
-            color = 'blue'
-        else:
-            color = 'white'
+    path = app.maze.getPath(checkPlayerLocation(app), (app.maze.rows-1, app.maze.cols-1))
+    for row, col in path:
+        
+        x0, x1, y0, y1 = getCellBounds(app, row, col)
+        cx, cy = (x1 + x0)/2, (y1 + y0)/2
 
-        drawCell(app, canvas, row, col, color)
+
+        nrow, ncol = path[(row, col)]
+        nx0, nx1, ny0, ny1 = getCellBounds(app, nrow, ncol)
+        ncx, ncy = (nx1 + nx0)/2, (ny1 + ny0)/2
+        canvas.create_line(cx, cy, ncx, ncy, fill = 'blue', width = 5)
 
 def drawEdges(app, canvas):
     for row, col in app.maze.table:
@@ -60,8 +73,30 @@ Movement
 def keyPressed(app, event):
     if event.key == 'p':
         app.path = not app.path
-    pass
+    elif event.key == 'r':
+        generateMaze(app)
 
+    #Moving
+    if event.key == 'Up':
+        movePlayer(app, 0, -5)
+    if event.key == 'Down':
+        movePlayer(app, 0, 5)
+    if event.key == 'Left':
+        movePlayer(app, -5, 0)
+    if event.key == 'Right':
+        movePlayer(app, 5, 0)
+
+def movePlayer(app, dx, dy):
+    cx, cy = app.player
+    cx += dx
+    cy += dy
+    app.player = (cx, cy)
+
+def drawPlayer(app, canvas):
+    cx, cy = app.player
+    x0, x1 = cx - 5, cx + 5
+    y0, y1 = cy - 5, cy + 5
+    canvas.create_oval(x0, y0, x1, y1, fill = 'red', outline = 'red')
 
 '''
 Timer
@@ -75,6 +110,7 @@ def redrawAll(app, canvas):
     drawEdges(app, canvas)
     if app.path:
         drawPath(app, canvas)
+    drawPlayer(app, canvas)
 
 
-runApp(width=500,height=500)
+runApp(width=800,height=800)
