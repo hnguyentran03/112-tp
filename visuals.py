@@ -3,6 +3,7 @@ from graph import *
 def appStarted(app):
     generateMaze(app)
     app.cellMargin = 5
+    app.path = False
     pass
 
 def generateMaze(app):
@@ -56,7 +57,9 @@ def drawMaze(app, canvas):
 '''
 Movement
 '''
-def mousePressed(app, event):
+def keyPressed(app, event):
+    if event.key == 'p':
+        app.path = not app.path
     pass
 
 
@@ -70,7 +73,8 @@ def redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill = 'black')
     drawMaze(app, canvas)
     drawEdges(app, canvas)
-    drawPath(app, canvas)
+    if app.path:
+        drawPath(app, canvas)
 
 
 runApp(width=500,height=500)
