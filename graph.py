@@ -87,6 +87,39 @@ class Maze(Graph):
             return None
 
 
+    #Drawing
+    def getCellBounds(self, app, row, col):
+        #Taken from 112 Notes/Lecture (also what do we do about the app.table)
+        gridWidth  = app.width - 2*app.margin
+        gridHeight = app.height - 2*app.margin
+        cellWidth = gridWidth / app.maze.cols
+        cellHeight = gridHeight / app.maze.rows
+        x0 = app.margin + col * cellWidth + app.cellMargin
+        x1 = app.margin + (col+1) * cellWidth - app.cellMargin
+        y0 = app.margin + row * cellHeight + app.cellMargin
+        y1 = app.margin + (row+1) * cellHeight - app.cellMargin
+        return x0, x1, y0, y1
+                
+    def drawCell(self, app, canvas, row, col, color = 'white'):
+        x0, x1, y0, y1 = self.getCellBounds(app, row, col)
+        canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
+    
+    def drawEdges(self, app, canvas):
+        for row, col in self.table:
+            for neighborRow, neighborCol in self.table[(row, col)]:
+                pathRow = (row + neighborRow) / 2
+                pathCol = (col + neighborCol) / 2
+                self.drawCell(app, canvas, pathRow, pathCol)
+
+    def drawMaze(self, app, canvas):
+        for row, col in self.table:
+            self.drawCell(app, canvas, row, col)
+    
+    def render(self, app, canvas):
+        self.drawMaze(app, canvas)
+        self.drawEdges(app, canvas)
+
+
 #TEST CODE
 def main():
     rows = cols = 10
