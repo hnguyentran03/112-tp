@@ -34,8 +34,6 @@ class Player():
         cy += dy
         self.location = (cx, cy)
 
-
-
     #Drawing the player
     def drawPlayer(self, app, canvas):
         cx, cy = self.location
