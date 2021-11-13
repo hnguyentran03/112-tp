@@ -49,6 +49,11 @@ class Graph():
                     visited.pop(nodeA)
             return None
 
+
+'''
+FROM GRAPH TO MAZE
+'''
+
 class Maze(Graph):
     #Checks if the move is legal or not
     def isLegalMove(self, row, col, visited):
@@ -86,7 +91,6 @@ class Maze(Graph):
                         return result
             return None
 
-
     #Drawing
     def getCellBounds(self, app, row, col):
         #Taken from 112 Notes/Lecture (also what do we do about the app.table)
@@ -118,6 +122,10 @@ class Maze(Graph):
     def render(self, app, canvas):
         self.drawMaze(app, canvas)
         self.drawEdges(app, canvas)
+
+
+
+
 
 
 #TEST CODE
