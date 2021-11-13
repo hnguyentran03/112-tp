@@ -14,34 +14,6 @@ def generateMaze(app):
     app.maze = Maze()
     app.maze.dfsMaze(rows, cols)
 
-'''
-Draw
-'''
-# def checkPlayerLocation(app):
-#     cx, cy = app.player.location
-#     gridWidth  = app.width - 2*app.margin
-#     gridHeight = app.height - 2*app.margin
-#     cellWidth = gridWidth / app.maze.cols
-#     cellHeight = gridHeight / app.maze.rows
-#     col = (cx - app.margin - app.cellMargin)/(cellWidth)
-#     row = (cy - app.margin - app.cellMargin)/(cellHeight)
-#     return int(row), int(col)
-
-# def getCellBounds(app, row, col):
-#     #Taken from 112 Notes/Lecture
-#     gridWidth  = app.width - 2*app.margin
-#     gridHeight = app.height - 2*app.margin
-#     cellWidth = gridWidth / app.maze.cols
-#     cellHeight = gridHeight / app.maze.rows
-#     x0 = app.margin + col * cellWidth + app.cellMargin
-#     x1 = app.margin + (col+1) * cellWidth - app.cellMargin
-#     y0 = app.margin + row * cellHeight + app.cellMargin
-#     y1 = app.margin + (row+1) * cellHeight - app.cellMargin
-#     return x0, x1, y0, y1
-            
-# def drawCell(app, canvas, row, col, color = 'white'):
-#     x0, x1, y0, y1 = getCellBounds(app, row, col)
-#     canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
 
 def drawPath(app, canvas):
     path = app.maze.getPath(app.player.checkLocation(app), (app.maze.rows-1, app.maze.cols-1))
@@ -55,18 +27,6 @@ def drawPath(app, canvas):
         ncx, ncy = (nx1 + nx0)/2, (ny1 + ny0)/2
         canvas.create_line(cx, cy, ncx, ncy, fill = 'blue', width = 5)
 
-# def drawEdges(app, canvas):
-#     for row, col in app.maze.table:
-#         for neighborRow, neighborCol in app.maze.table[(row, col)]:
-#             pathRow = (row + neighborRow) / 2
-#             pathCol = (col + neighborCol) / 2
-#             drawCell(app, canvas, pathRow, pathCol)
-
-# def drawMaze(app, canvas):
-#     for row, col in app.maze.table:
-#         drawCell(app, canvas, row, col)
-
-
 '''
 Movement
 '''
@@ -78,18 +38,6 @@ def keyPressed(app, event):
 
     #Moving
     app.player.moveWithKeys(app, event)
-
-# def movePlayer(app, dx, dy):
-#     cx, cy = app.player
-#     cx += dx
-#     cy += dy
-#     app.player = (cx, cy)
-
-# def drawPlayer(app, canvas):
-#     cx, cy = app.player
-#     x0, x1 = cx - 5, cx + 5
-#     y0, y1 = cy - 5, cy + 5
-#     canvas.create_oval(x0, y0, x1, y1, fill = 'red', outline = 'red')
 
 '''
 Timer
