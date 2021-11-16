@@ -53,8 +53,10 @@ class Graph():
 '''
 FROM GRAPH TO MAZE
 '''
-
 class Maze(Graph):
+    def __init__(self, app):
+        super().__init__()
+        self.app = app
     #Checks if the move is legal or not
     def isLegalMove(self, row, col, visited):
         if 0 <= row < self.rows and 0 <= col < self.cols:
@@ -92,36 +94,36 @@ class Maze(Graph):
             return None
 
     #Drawing
-    def getCellBounds(self, app, row, col):
+    def getCellBounds(self, row, col):
         #Taken from 112 Notes/Lecture (also what do we do about the app.table)
-        gridWidth  = app.width - 2*app.margin
-        gridHeight = app.height - 2*app.margin
-        cellWidth = gridWidth / app.maze.cols
-        cellHeight = gridHeight / app.maze.rows
-        x0 = app.margin + col * cellWidth + app.cellMargin
-        x1 = app.margin + (col+1) * cellWidth - app.cellMargin
-        y0 = app.margin + row * cellHeight + app.cellMargin
-        y1 = app.margin + (row+1) * cellHeight - app.cellMargin
+        gridWidth  = self.app.width - 2*self.app.margin
+        gridHeight = self.app.height - 2*self.app.margin
+        cellWidth = gridWidth / self.app.maze.cols
+        cellHeight = gridHeight / self.app.maze.rows
+        x0 = self.app.margin + col * cellWidth + self.app.cellMargin
+        x1 = self.app.margin + (col+1) * cellWidth - self.app.cellMargin
+        y0 = self.app.margin + row * cellHeight + self.app.cellMargin
+        y1 = self.app.margin + (row+1) * cellHeight - self.app.cellMargin
         return x0, x1, y0, y1
                 
-    def drawCell(self, app, canvas, row, col, color = 'white'):
-        x0, x1, y0, y1 = self.getCellBounds(app, row, col)
+    def drawCell(self, canvas, row, col, color = 'white'):
+        x0, x1, y0, y1 = self.getCellBounds(row, col)
         canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
     
-    def drawEdges(self, app, canvas):
+    def drawEdges(self,canvas):
         for row, col in self.table:
             for neighborRow, neighborCol in self.table[(row, col)]:
                 pathRow = (row + neighborRow) / 2
                 pathCol = (col + neighborCol) / 2
-                self.drawCell(app, canvas, pathRow, pathCol)
+                self.drawCell(canvas, pathRow, pathCol)
 
-    def drawMaze(self, app, canvas):
+    def drawMaze(self, canvas):
         for row, col in self.table:
-            self.drawCell(app, canvas, row, col)
+            self.drawCell(canvas, row, col)
     
-    def render(self, app, canvas):
-        self.drawMaze(app, canvas)
-        self.drawEdges(app, canvas)
+    def render(self, canvas):
+        self.drawMaze(canvas)
+        self.drawEdges(canvas)
 
 
 
