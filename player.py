@@ -1,3 +1,5 @@
+import math
+
 class Player():
     def __init__(self, app):
         #This seems weird
@@ -5,6 +7,11 @@ class Player():
         x0, x1, y0, y1 = app.maze.getCellBounds(0, 0)
         cx, cy = (x1 + x0) / 2, (y1 + y0) / 2
         self.location = (cx, cy)
+        self.angle = 0
+        self.distance = 5
+        self.dangle = 0.2
+        self.dx = self.distance * math.cos(self.angle)
+        self.dy = self.distance * math.sin(self.angle)
 
     def checkLocation(self):
         cx, cy = self.location
@@ -18,27 +25,39 @@ class Player():
     
     #Moving the player
     def moveWithKeys(self, event):
+        #Moving
         if event.key == 'Up':
-            self.movePlayer(self.app, 0, -5)
+            self.movePlayer(1)
         elif event.key == 'Down':
-            self.movePlayer(self.app, 0, 5)
+            self.movePlayer(-1)
+        
+        #Turning
         elif event.key == 'Left':
-            self.movePlayer(self.app, -5, 0)
+            self.angle -= self.dangle
+            if self.angle < 0:
+                self.angle += 2 * math.pi
+            self.dx = self.distance * math.cos(self.angle)
+            self.dy = self.distance * math.sin(self.angle)
+        
         elif event.key == 'Right':
-            self.movePlayer(self.app, 5, 0)
+            self.angle += self.dangle
+            if self.angle < 0:
+                self.angle += 2 * math.pi
+            self.dx = self.distance * math.cos(self.angle)
+            self.dy = self.distance * math.sin(self.angle)
     
-    def movePlayer(self, dx, dy):
+    def movePlayer(self, direction):
         cx, cy = self.location
-        cx += dx
-        cy += dy
+        cx += self.dx * direction
+        cy += self.dy * direction
         self.location = (cx, cy)
 
     #Drawing the player
     def drawPlayer(self, canvas):
         cx, cy = self.location
-        x0, x1 = cx - 5, cx + 5
-        y0, y1 = cy - 5, cy + 5
-        canvas.create_oval(x0, y0, x1, y1, fill = 'red', outline = 'red')
+        r = 5
+        canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill = 'red', outline = 'red')
+        canvas.create_line(cx, cy, cx+self.dx, cy + self.dy, fill = 'red', width = 3)
     
     def render(self, canvas):
         self.drawPlayer(canvas)
