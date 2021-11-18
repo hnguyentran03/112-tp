@@ -11,6 +11,10 @@ class Ray():
         self.cx, self.cy = self.app.player
         self.castRay()
     
+    def getDistance(self):
+        distance = (self.rayX**2 + self.rayY**2)**(1/2)
+        return distance
+    
     def checkHorizontalLines(self):
         cx, cy = self.app.player
         if 0 < self.angle < math.pi:
@@ -71,9 +75,11 @@ class Ray():
         cx, cy = self.app.player
         horizontalRayX, horizontalRayY = self.checkHorizontalLines()
         verticalRayX, verticalRayY = self.checkVerticalLines()
+        horizontalRayX, horizontalRayY = horizontalRayX-cx, horizontalRayY-cy
+        verticalRayX, verticalRayY = verticalRayX-cx, verticalRayY-cy
 
-        horizontalRay = ((horizontalRayX-cx)**2 + (horizontalRayY-cy)**2)**(1/2)
-        verticalRay = ((verticalRayX-cx)**2 + (verticalRayY-cy)**2)**(1/2)
+        horizontalRay = ((horizontalRayX)**2 + (horizontalRayY)**2)**(1/2)
+        verticalRay = ((verticalRayX)**2 + (verticalRayY)**2)**(1/2)
 
         if horizontalRay > verticalRay:
             self.rayX = verticalRayX
@@ -100,11 +106,11 @@ class Ray():
     
     def render(self, canvas):
         cx, cy = self.app.player
-        canvas.create_line(cx, cy, self.rayX, self.rayY, fill = 'red')
+        canvas.create_line(cx, cy, cx+self.rayX, cy+self.rayY, fill = 'red')
 
 def cellDimension(app):
-    gridWidth  = app.width - 2*app.margin
-    gridHeight = app.height - 2*app.margin
+    gridWidth  = 500
+    gridHeight = 500
     app.cellWidth = gridWidth / len(app.maze[0])
     app.cellHeight = gridHeight / len(app.maze)
 
@@ -140,6 +146,10 @@ def createRays(app):
 
 
 
+
+
+
+#THESE ARE JUST TESTS
 def drawMaze(app, canvas):
     for row in range(len(app.maze)):
         for col in range(len(app.maze[0])):
