@@ -13,7 +13,7 @@ def generateMaze(app):
     app.cellMargin = 5
     app.maze = Maze(app)
     app.maze.dfsMaze(rows, cols)
-    app.maze.convertTo2DList()
+    # app.maze.convertTo2DList()
 
 
 def drawPath(app, canvas):
