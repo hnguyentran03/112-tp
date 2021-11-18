@@ -11,7 +11,7 @@ class Ray():
         self.cx, self.cy = self.app.player
         self.castRay()
     
-    def castRay(self):
+    def checkHorizontalLines(self):
         cx, cy = self.app.player
         if 0 < self.angle < math.pi:
             direction = 'Down'
@@ -22,12 +22,13 @@ class Ray():
             yOffset = -1
             firstIntersectionY = (cy // self.app.cellHeight) * self.app.cellHeight
         else:
-            firstIntersectionY = 0
-            yOffset = 1
             direction = ''
-        firstIntersectionX = cx + abs((cy-firstIntersectionY))/math.tan(self.angle)*yOffset
-        dx = self.app.cellHeight/math.tan(self.angle)*yOffset
-        dy = self.app.cellHeight*yOffset
+            yOffset = 1
+            firstIntersectionY = 0
+        
+        firstIntersectionX = cx + abs((cy - firstIntersectionY)) / math.tan(self.angle) * yOffset
+        dx = self.app.cellHeight / math.tan(self.angle) * yOffset
+        dy = self.app.cellHeight * yOffset
         
         rayX = firstIntersectionX
         rayY = firstIntersectionY
@@ -35,17 +36,69 @@ class Ray():
         while not(self.hitWall(rayX, rayY, direction)):
             rayX += dx
             rayY += dy
-        print()
-        self.rayX = rayX
-        self.rayY = rayY
+        
+        return rayX, rayY
+
+    def checkVerticalLines(self):
+        cx, cy = self.app.player
+        if 3/2*math.pi < self.angle <= 2*math.pi or 0 <= self.angle < 1/2*math.pi:
+            direction = 'Right'
+            xOffset = 1
+            firstIntersectionX = (cx // self.app.cellWidth + 1) * self.app.cellWidth
+        elif math.pi < self.angle < 2*math.pi:
+            direction = 'Left'
+            xOffset = -1
+            firstIntersectionX = (cx // self.app.cellWidth) * self.app.cellWidth
+        else:
+            direction = ''
+            xOffset = 1
+            firstIntersectionX = 0
+
+        firstIntersectionY = cy - abs(cx-firstIntersectionX) * math.tan(self.angle) * xOffset
+        dx = self.app.cellWidth * xOffset
+        dy = self.app.cellWidth * math.tan(self.angle) * xOffset
+
+        rayX = firstIntersectionX
+        rayY = firstIntersectionY
+        
+        while not(self.hitWall(rayX, rayY, direction)):
+            rayX += dx
+            rayY += dy
+        
+        return rayX, rayY
+
+    def castRay(self):
+        horizontalRayX, horizontalRayY = self.checkHorizontalLines()
+        verticalRayX, verticalRayY = self.checkVerticalLines()
+
+        print('h', horizontalRayX, horizontalRayY)
+        print('v', verticalRayX, verticalRayY)
+
+        horizontalRay = (horizontalRayX**2 + horizontalRayY**2)**(1/2)
+        verticalRay = (verticalRayX**2 + verticalRayY**2)**(1/2)
+
+        if horizontalRay > verticalRay:
+            self.rayX = verticalRayX
+            self.rayY = verticalRayY
+        else:
+            self.rayX = horizontalRayX
+            self.rayY = horizontalRayY
+            
+        self.rayX = verticalRayX
+        self.rayY = verticalRayY
 
     
     def hitWall(self, rayX, rayY, direction):
         if direction == 'Up':
-            row, col = int(rayY//self.app.cellHeight-1), int(rayX//self.app.cellHeight)
-        else:
-            row, col = int(rayY//self.app.cellHeight), int(rayX//self.app.cellHeight)
-        print(row, col)
+            row, col = int(rayY//self.app.cellHeight-1), int(rayX//self.app.cellWidth)
+        elif direction == 'Down':
+            row, col = int(rayY//self.app.cellHeight), int(rayX//self.app.cellWidth)
+        elif direction == 'Left':
+            row, col = int(rayY//self.app.cellHeight), int(rayX//self.app.cellWidth-1)
+        elif direction == 'Right':
+            row, col = int(rayY//self.app.cellHeight), int(rayX//self.app.cellWidth)
+        else: return True
+        
         if not(0 < row < 5) or not(0 < col < 5) or self.app.maze[row][col] == 1:
             return True
         else:
