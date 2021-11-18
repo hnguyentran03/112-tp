@@ -142,7 +142,7 @@ class Maze(Graph):
     def convertTo2DList(self):
         maze = [[None]*self.cols for _ in range(self.rows)]
         for row, col in self.table:
-            maze[row][col] = 1
+            maze[row][col] = (row, col)
         for cell in self.table:
             row, col = cell
             neighbors = self.getNeighbors(cell)
