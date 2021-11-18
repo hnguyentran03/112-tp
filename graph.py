@@ -115,10 +115,11 @@ class Maze(Graph):
     
     def drawEdges(self,canvas):
         for row, col in self.table:
-            for neighborRow, neighborCol in self.table[(row, col)]:
-                pathRow = (row + neighborRow) / 2
-                pathCol = (col + neighborCol) / 2
-                self.drawCell(canvas, pathRow, pathCol)
+            for neighborRow, neighborCol in self.getNeighbors((row, col)):
+                #Gets the edges of both cell and neighbor and make a rectangle to fill in
+                _, x1, _, y1 = self.getCellBounds(row, col)
+                nx0, _, ny0, _ = self.getCellBounds(neighborRow, neighborCol)
+                canvas.create_rectangle(nx0, ny0, x1, y1, fill = 'white', outline = '')
 
     def drawMaze(self, canvas):
         for row, col in self.table:
@@ -127,6 +128,16 @@ class Maze(Graph):
     def render(self, canvas):
         self.drawMaze(canvas)
         self.drawEdges(canvas)
+
+
+
+
+
+
+
+
+
+
 
     def convertTo2DList(self):
         maze = [[None]*self.cols for _ in range(self.rows)]
@@ -137,11 +148,9 @@ class Maze(Graph):
             neighbors = self.getNeighbors(cell)
             for neighbor in neighbors:
                 nrow, ncol = neighbor
-                drow = row - nrow
-                dcol = col - ncol
-                print(cell, neighbor, (drow, dcol))
+                xrow = (nrow + row)/2
+                xcol = (ncol + col)/2    
         print2dList(maze)
-        
 
 def repr2dList(L):
     if (L == []): return '[]'
