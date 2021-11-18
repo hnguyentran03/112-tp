@@ -8,11 +8,12 @@ def appStarted(app):
     pass
 
 def generateMaze(app):
-    rows = cols = 20
+    rows = cols = 10
     app.margin = 10
     app.cellMargin = 5
     app.maze = Maze(app)
     app.maze.dfsMaze(rows, cols)
+    app.maze.convertTo2DList()
 
 
 def drawPath(app, canvas):
