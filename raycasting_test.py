@@ -72,10 +72,6 @@ class Ray():
         horizontalRayX, horizontalRayY = self.checkHorizontalLines()
         verticalRayX, verticalRayY = self.checkVerticalLines()
 
-        print('h', horizontalRayX, horizontalRayY)
-        print('v', verticalRayX, verticalRayY)
-        print()
-
         horizontalRay = ((horizontalRayX-cx)**2 + (horizontalRayY-cy)**2)**(1/2)
         verticalRay = ((verticalRayX-cx)**2 + (verticalRayY-cy)**2)**(1/2)
 
@@ -97,7 +93,7 @@ class Ray():
             row, col = int(rayY//self.app.cellHeight), int(rayX//self.app.cellWidth)
         else: return True
         
-        if not(0 < row < 5) or not(0 < col < 5) or self.app.maze[row][col] == 1:
+        if not(0 <= row < 5) or not(0 <= col < 5) or self.app.maze[row][col] == 1:
             return True
         else:
             return False
@@ -117,13 +113,32 @@ def appStarted(app):
     app.player = (150, 150)
     app.playerAngle = 1/2*math.pi
     app.playerMove = (10*math.cos(app.playerAngle), 10*math.sin(app.playerAngle))
-    app.maze =[[1, 1, 1, 1, 1],
-               [1, 0, 0, 0, 1],
+    app.maze =[[1, 0, 1, 1, 1],
+               [0, 0, 0, 0, 1],
                [1, 0, 1, 0, 1],
                [1, 0, 0, 0, 1],
-               [1, 1, 1, 1, 1]]
+               [1, 0, 1, 1, 1]]
     cellDimension(app)
-    app.ray = Ray(app, app.playerAngle)
+    createRays(app)
+
+def createRays(app):
+    app.rays = []
+    for difference in range(50):
+        angleDifference = math.pi/(2**8)*difference
+        
+        leftAngle = app.playerAngle-angleDifference
+        rightAngle = app.playerAngle+angleDifference
+        if leftAngle < 0: leftAngle += 2*math.pi
+        elif leftAngle > 2*math.pi: leftAngle -= 2*math.pi
+        if rightAngle < 0: rightAngle += 2*math.pi
+        elif rightAngle > 2*math.pi: rightAngle -= 2*math.pi
+
+        leftRay = Ray(app, leftAngle)
+        rightRay = Ray(app, rightAngle)
+        app.rays.append(leftRay)
+        app.rays.append(rightRay)
+
+
 
 def drawMaze(app, canvas):
     for row in range(len(app.maze)):
@@ -156,7 +171,8 @@ def drawPlayer(app, canvas):
 def redrawAll(app, canvas):
     drawMaze(app, canvas)
     drawPlayer(app, canvas)
-    app.ray.render(canvas)
+    for ray in app.rays:
+        ray.render(canvas)
 
 def movePlayer(app, direction):
     cx, cy = app.player
@@ -188,8 +204,8 @@ def keyPressed(app, event):
         dx = math.cos(app.playerAngle)
         dy = math.sin(app.playerAngle)
         app.playerMove = (10*dx, 10*dy)
-    
-    app.ray = Ray(app, app.playerAngle)
+
+    createRays(app)
 
 
 
