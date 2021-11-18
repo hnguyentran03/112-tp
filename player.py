@@ -13,6 +13,7 @@ class Player():
         self.dx = self.distance * math.cos(self.angle)
         self.dy = self.distance * math.sin(self.angle)
 
+    #Gets the current cell the player is in
     def checkLocation(self):
         cx, cy = self.location
         gridWidth  = self.app.width - 2*self.app.margin
@@ -22,6 +23,27 @@ class Player():
         col = (cx - self.app.margin - self.app.cellMargin)/(cellWidth)
         row = (cy - self.app.margin - self.app.cellMargin)/(cellHeight)
         return int(row), int(col)
+    
+    def isLegalPosition(self, cx, cy):
+        # row, col = self.checkLocation()
+        # #Cell legality check
+        # x0, x1, y0, y1 = self.app.maze.getCellBounds(row, col)
+        # outOfCellBounds = cx < x0 or cx > x1 or cx < y0 or cx > y1
+        
+        # if not outOfCellBounds:
+        #     return True
+        
+        # for neighborRow, neighborCol in self.app.maze.getNeighbors((row, col)):
+        #         nx0, _, ny0, _ = self.app.maze.getCellBounds(neighborRow, neighborCol)
+                
+        #         outOfEdgeBounds = cx < x1 or cx > nx0 or cy < y1 or cy > ny0
+        #         if not outOfEdgeBounds:
+        #             return True
+        
+        # return False
+        return True
+
+
     
     #Moving the player
     def moveWithKeys(self, event):
@@ -50,7 +72,8 @@ class Player():
         cx, cy = self.location
         cx += self.dx * direction
         cy += self.dy * direction
-        self.location = (cx, cy)
+        if self.isLegalPosition(cx, cy):
+            self.location = (cx, cy)
 
     #Drawing the player
     def drawPlayer(self, canvas):
