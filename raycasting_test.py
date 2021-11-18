@@ -1,19 +1,73 @@
 #FROM https://www.youtube.com/watch?v=gYRrGTC7GtA
+#https://permadi.com/1996/05/ray-casting-tutorial-7/
 #raycasting test
 from cmu_112_graphics import *
 import math
 
+class Ray():
+    def __init__(self, app, angle):
+        self.app = app
+        self.angle = angle
+        self.cx, self.cy = self.app.player
+        self.castRay()
+    
+    def castRay(self):
+        cx, cy = self.app.player
+        if 0 < self.angle < math.pi:
+            direciton = 'Down'
+            yOffset = 1
+            firstIntersectionY = (cy // self.app.cellHeight + 1) * self.app.cellHeight
+            angle = self.angle
+        elif math.pi < self.angle < 2*math.pi:
+            direction = 'Up'
+            yOffset = -1
+            firstIntersectionY = cy // self.app.cellHeight * self.app.cellHeight
+            angle = math.pi-self.angle
+        firstIntersectionX = firstIntersectionY/math.tan(angle)
+        dx = self.app.cellHeight/math.tan(angle)
+        dy = self.app.cellHeight
+        
+        rayX = cx + firstIntersectionX
+        rayY = cy + firstIntersectionY*yOffset
+
+        while not(self.hitWall(rayX, rayY)):
+            rayX += dx
+            rayY += dy
+        
+        self.rayX = rayX
+        self.rayY = rayY
+
+    
+    def hitWall(self, rayX, rayY):
+        # row, col = int(rayY//self.app.cellHeight), int(rayX//self.app.cellHeight)
+        # if self.app.maze[row][col] == 1:
+        #     return True
+        # else:
+        #     return False
+        return True
+    
+    def render(self, canvas):
+        cx, cy = self.app.player
+        canvas.create_line(cx, cy, self.rayX, self.rayY, fill = 'red')
+
+def cellDimension(app):
+    gridWidth  = app.width - 2*app.margin
+    gridHeight = app.height - 2*app.margin
+    app.cellWidth = gridWidth / len(app.maze[0])
+    app.cellHeight = gridHeight / len(app.maze)
 
 def appStarted(app):
     app.margin = 5
     app.player = (150, 150)
-    app.playerAngle = 0
+    app.playerAngle = 1/2*math.pi
     app.playerMove = (10*math.cos(app.playerAngle), 10*math.sin(app.playerAngle))
     app.maze =[[1, 1, 1, 1, 1],
                [1, 0, 0, 0, 1],
                [1, 0, 1, 0, 1],
                [1, 0, 0, 0, 1],
                [1, 1, 1, 1, 1]]
+    cellDimension(app)
+    app.ray = Ray(app, app.playerAngle)
 
 def drawMaze(app, canvas):
     for row in range(len(app.maze)):
@@ -30,14 +84,10 @@ def drawCell(app, canvas, row, col, color = 'white'):
 
 def getCellBounds(app, row, col):
     #Taken from 112 Notes/Lecture (also what do we do about the app.table)
-    gridWidth  = app.width - 2*app.margin
-    gridHeight = app.height - 2*app.margin
-    cellWidth = gridWidth / len(app.maze[0])
-    cellHeight = gridHeight / len(app.maze)
-    x0 = app.margin + col * cellWidth
-    x1 = app.margin + (col+1) * cellWidth
-    y0 = app.margin + row * cellHeight
-    y1 = app.margin + (row+1) * cellHeight
+    x0 = app.margin + col * app.cellWidth
+    x1 = app.margin + (col+1) * app.cellWidth
+    y0 = app.margin + row * app.cellHeight
+    y1 = app.margin + (row+1) * app.cellHeight
     return x0, x1, y0, y1
 
 def drawPlayer(app, canvas):
@@ -50,20 +100,23 @@ def drawPlayer(app, canvas):
 def redrawAll(app, canvas):
     drawMaze(app, canvas)
     drawPlayer(app, canvas)
+    app.ray.render(canvas)
 
-def movePlayer(app):
+def movePlayer(app, direction):
     cx, cy = app.player
     dx, dy = app.playerMove
-    cx += dx
-    cy += dy
+    cx += dx * direction
+    cy += dy * direction
     app.player = (cx, cy)
 
 def keyPressed(app, event):
-    if event.key == 'Up' or event.key == 'Down':
-        movePlayer(app)
+    if event.key == 'Up':
+        movePlayer(app, 1)
+    elif event.key == 'Down':
+        movePlayer(app, -1)
     
     if event.key == 'Left':
-        app.playerAngle -= 0.2
+        app.playerAngle -= math.pi/24
         if app.playerAngle < 0:
             app.playerAngle += 2*math.pi
         dx, dy = app.playerMove
@@ -72,15 +125,16 @@ def keyPressed(app, event):
         app.playerMove = (10*dx, 10*dy)
    
     elif event.key == 'Right':
-        app.playerAngle += 0.2
-        if app.playerAngle < 2*math.pi:
+        app.playerAngle += math.pi/24
+        if app.playerAngle > 2*math.pi:
             app.playerAngle -= 2*math.pi
         dx, dy = app.playerMove
         dx = math.cos(app.playerAngle)
         dy = math.sin(app.playerAngle)
         app.playerMove = (10*dx, 10*dy)
+    
+    app.ray = Ray(app, app.playerAngle)
 
-        
 
 
 
