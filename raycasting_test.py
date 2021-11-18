@@ -45,7 +45,7 @@ class Ray():
             direction = 'Right'
             xOffset = 1
             firstIntersectionX = (cx // self.app.cellWidth + 1) * self.app.cellWidth
-        elif math.pi < self.angle < 2*math.pi:
+        elif 1/2*math.pi < self.angle <= math.pi or math.pi <= self.angle < 3/2*math.pi:
             direction = 'Left'
             xOffset = -1
             firstIntersectionX = (cx // self.app.cellWidth) * self.app.cellWidth
@@ -54,7 +54,7 @@ class Ray():
             xOffset = 1
             firstIntersectionX = 0
 
-        firstIntersectionY = cy - abs(cx-firstIntersectionX) * math.tan(self.angle) * xOffset
+        firstIntersectionY = cy + abs(cx-firstIntersectionX) * math.tan(self.angle) * xOffset
         dx = self.app.cellWidth * xOffset
         dy = self.app.cellWidth * math.tan(self.angle) * xOffset
 
@@ -68,14 +68,16 @@ class Ray():
         return rayX, rayY
 
     def castRay(self):
+        cx, cy = self.app.player
         horizontalRayX, horizontalRayY = self.checkHorizontalLines()
         verticalRayX, verticalRayY = self.checkVerticalLines()
 
         print('h', horizontalRayX, horizontalRayY)
         print('v', verticalRayX, verticalRayY)
+        print()
 
-        horizontalRay = (horizontalRayX**2 + horizontalRayY**2)**(1/2)
-        verticalRay = (verticalRayX**2 + verticalRayY**2)**(1/2)
+        horizontalRay = ((horizontalRayX-cx)**2 + (horizontalRayY-cy)**2)**(1/2)
+        verticalRay = ((verticalRayX-cx)**2 + (verticalRayY-cy)**2)**(1/2)
 
         if horizontalRay > verticalRay:
             self.rayX = verticalRayX
@@ -83,10 +85,6 @@ class Ray():
         else:
             self.rayX = horizontalRayX
             self.rayY = horizontalRayY
-            
-        self.rayX = verticalRayX
-        self.rayY = verticalRayY
-
     
     def hitWall(self, rayX, rayY, direction):
         if direction == 'Up':
@@ -103,7 +101,6 @@ class Ray():
             return True
         else:
             return False
-        # return True
     
     def render(self, canvas):
         cx, cy = self.app.player
