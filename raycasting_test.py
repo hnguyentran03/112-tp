@@ -14,37 +14,43 @@ class Ray():
     def castRay(self):
         cx, cy = self.app.player
         if 0 < self.angle < math.pi:
-            direciton = 'Down'
+            direction = 'Down'
             yOffset = 1
             firstIntersectionY = (cy // self.app.cellHeight + 1) * self.app.cellHeight
-            angle = self.angle
         elif math.pi < self.angle < 2*math.pi:
             direction = 'Up'
             yOffset = -1
-            firstIntersectionY = cy // self.app.cellHeight * self.app.cellHeight
-            angle = math.pi-self.angle
-        firstIntersectionX = firstIntersectionY/math.tan(angle)
-        dx = self.app.cellHeight/math.tan(angle)
-        dy = self.app.cellHeight
+            firstIntersectionY = (cy // self.app.cellHeight) * self.app.cellHeight
+        else:
+            firstIntersectionY = 0
+            yOffset = 1
+            direction = ''
+        firstIntersectionX = cx + abs((cy-firstIntersectionY))/math.tan(self.angle)*yOffset
+        dx = self.app.cellHeight/math.tan(self.angle)*yOffset
+        dy = self.app.cellHeight*yOffset
         
-        rayX = cx + firstIntersectionX
-        rayY = cy + firstIntersectionY*yOffset
+        rayX = firstIntersectionX
+        rayY = firstIntersectionY
 
-        while not(self.hitWall(rayX, rayY)):
+        while not(self.hitWall(rayX, rayY, direction)):
             rayX += dx
             rayY += dy
-        
+        print()
         self.rayX = rayX
         self.rayY = rayY
 
     
-    def hitWall(self, rayX, rayY):
-        # row, col = int(rayY//self.app.cellHeight), int(rayX//self.app.cellHeight)
-        # if self.app.maze[row][col] == 1:
-        #     return True
-        # else:
-        #     return False
-        return True
+    def hitWall(self, rayX, rayY, direction):
+        if direction == 'Up':
+            row, col = int(rayY//self.app.cellHeight-1), int(rayX//self.app.cellHeight)
+        else:
+            row, col = int(rayY//self.app.cellHeight), int(rayX//self.app.cellHeight)
+        print(row, col)
+        if not(0 < row < 5) or not(0 < col < 5) or self.app.maze[row][col] == 1:
+            return True
+        else:
+            return False
+        # return True
     
     def render(self, canvas):
         cx, cy = self.app.player
@@ -57,7 +63,7 @@ def cellDimension(app):
     app.cellHeight = gridHeight / len(app.maze)
 
 def appStarted(app):
-    app.margin = 5
+    app.margin = 0
     app.player = (150, 150)
     app.playerAngle = 1/2*math.pi
     app.playerMove = (10*math.cos(app.playerAngle), 10*math.sin(app.playerAngle))
