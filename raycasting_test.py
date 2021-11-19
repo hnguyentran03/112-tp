@@ -134,13 +134,13 @@ def appStarted(app):
                [1, 0, 0, 0, 1],
                [1, 0, 1, 1, 1]]
     cellDimension(app)
-    app.numRays = 50
+    app.numRays = 70
     createRays(app)
 
 def createRays(app):
     app.rays = []
     for difference in range(app.numRays):
-        angleDifference = math.pi/(2**8)*difference
+        angleDifference = math.pi/(2**9)*difference
         
         leftAngle = app.playerAngle-angleDifference
         rightAngle = app.playerAngle+angleDifference
@@ -183,11 +183,11 @@ def drawPlayer(app, canvas):
     canvas.create_line(cx, cy, cx+2*dx, cy+2*dy, fill = 'yellow', width = 3)
 
 def redrawAll(app, canvas):
-    draw3D(app, canvas)
-    # drawMaze(app, canvas)
-    # drawPlayer(app, canvas)
-    # for ray in app.rays:
-    #     ray.render(canvas)
+    # draw3D(app, canvas)
+    drawMaze(app, canvas)
+    drawPlayer(app, canvas)
+    for ray in app.rays:
+        ray.render(canvas)
 
 def movePlayer(app, direction):
     cx, cy = app.player
