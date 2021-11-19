@@ -128,6 +128,7 @@ class Maze(Graph):
     def render(self, canvas):
         self.drawMaze(canvas)
         self.drawEdges(canvas)
+        # self.drawListMaze(canvas)
 
 
 
@@ -136,21 +137,42 @@ class Maze(Graph):
 
 
 
-
-
+    def getCellBounds2(self, row, col):
+        #Taken from 112 Notes/Lecture (also what do we do about the app.table)
+        gridWidth  = self.app.width - 2*self.app.margin
+        gridHeight = self.app.height - 2*self.app.margin
+        cellWidth = gridWidth / len(self.listMaze)
+        cellHeight = gridHeight / len(self.listMaze[0])
+        x0 = self.app.margin + col * cellWidth
+        x1 = self.app.margin + (col+1) * cellWidth
+        y0 = self.app.margin + row * cellHeight
+        y1 = self.app.margin + (row+1) * cellHeight
+        return x0, x1, y0, y1
 
     def convertTo2DList(self):
-        maze = [[None]*self.cols for _ in range(self.rows)]
+        maze = [[None]*(self.cols*2-1) for _ in range(self.rows*2-1)]
         for row, col in self.table:
-            maze[row][col] = (row, col)
+            maze[row*2][col*2] = (row, col)
         for cell in self.table:
             row, col = cell
             neighbors = self.getNeighbors(cell)
             for neighbor in neighbors:
                 nrow, ncol = neighbor
-                xrow = (nrow + row)/2
-                xcol = (ncol + col)/2    
-        print2dList(maze)
+                drow, dcol = nrow - row, ncol - col
+                maze[row*2+drow][col*2+dcol] = 'path'
+        self.listMaze = maze
+
+    def drawListMaze(self, canvas):
+        numRows = len(self.listMaze)
+        numCols = len(self.listMaze[0])
+        for row in range(numRows):
+            for col in range(numCols):
+                color = 'white'
+                if self.listMaze[row][col] is None:
+                    color = 'black'
+                x0, x1, y0, y1 = self.getCellBounds2(row, col)
+                canvas.create_rectangle(x0, y0, x1, y1, fill = color)
+
 
 def repr2dList(L):
     if (L == []): return '[]'
