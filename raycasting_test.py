@@ -2,6 +2,7 @@
 #https://permadi.com/1996/05/ray-casting-tutorial-7/
 #raycasting test
 from cmu_112_graphics import *
+from graph import *
 import math
 
 class Ray():
@@ -99,7 +100,7 @@ class Ray():
             row, col = int(rayY//self.app.cellHeight), int(rayX//self.app.cellWidth)
         else: return True
         
-        if not(0 <= row < 5) or not(0 <= col < 5) or self.app.maze[row][col] == 1:
+        if not(0 <= row < len(self.app.maze)) or not(0 <= col < len(self.app.maze)) or self.app.maze[row][col] == 1:
             return True
         else:
             return False
@@ -108,6 +109,12 @@ class Ray():
         cx, cy = self.app.player
         canvas.create_line(cx, cy, cx+self.rayX, cy+self.rayY, fill = 'red')
 
+
+
+
+
+
+#TESTING
 def cellDimension(app):
     gridWidth  = 500
     gridHeight = 500
@@ -119,17 +126,20 @@ def appStarted(app):
     app.player = (150, 150)
     app.playerAngle = 1/2*math.pi
     app.playerMove = (10*math.cos(app.playerAngle), 10*math.sin(app.playerAngle))
+    app.mazeGen = Maze(app)
+    app.mazeGen.dfsMaze(5,5)
     app.maze =[[1, 0, 1, 1, 1],
                [0, 0, 0, 0, 1],
                [1, 0, 1, 0, 1],
                [1, 0, 0, 0, 1],
                [1, 0, 1, 1, 1]]
     cellDimension(app)
+    app.numRays = 50
     createRays(app)
 
 def createRays(app):
     app.rays = []
-    for difference in range(50):
+    for difference in range(app.numRays):
         angleDifference = math.pi/(2**8)*difference
         
         leftAngle = app.playerAngle-angleDifference
@@ -141,21 +151,15 @@ def createRays(app):
 
         leftRay = Ray(app, leftAngle)
         rightRay = Ray(app, rightAngle)
-        app.rays.append(leftRay)
+        app.rays.insert(0, leftRay)
         app.rays.append(rightRay)
 
-
-
-
-
-
-#THESE ARE JUST TESTS
 def drawMaze(app, canvas):
     for row in range(len(app.maze)):
         for col in range(len(app.maze[0])):
-            color = 'black'
+            color = 'white'
             if app.maze[row][col] == 1:
-                color = 'white'
+                color = 'black'
             drawCell(app, canvas, row, col, color)
 
 
@@ -179,10 +183,11 @@ def drawPlayer(app, canvas):
     canvas.create_line(cx, cy, cx+2*dx, cy+2*dy, fill = 'yellow', width = 3)
 
 def redrawAll(app, canvas):
-    drawMaze(app, canvas)
-    drawPlayer(app, canvas)
-    for ray in app.rays:
-        ray.render(canvas)
+    draw3D(app, canvas)
+    # drawMaze(app, canvas)
+    # drawPlayer(app, canvas)
+    # for ray in app.rays:
+    #     ray.render(canvas)
 
 def movePlayer(app, direction):
     cx, cy = app.player
@@ -220,5 +225,20 @@ def keyPressed(app, event):
 
 
 
+
+#USEFUL
+def draw3D(app, canvas):
+    wallHeight = 200
+    constant = 255
+    midpoint = app.height/2
+    dx = app.width / app.numRays
+    for i, ray in enumerate(app.rays):
+        distanceToWall = ray.getDistance()
+        height = wallHeight/distanceToWall*constant
+        y0 = midpoint - height/2
+        y1 = midpoint + height/2
+        x0 = dx * i
+        x1 = dx * (i + 1)
+        canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue', outline = '')
 
 runApp(width=500,height=500)
