@@ -203,7 +203,7 @@ def keyPressed(app, event):
         movePlayer(app, -1)
     
     if event.key == 'Left':
-        app.playerAngle -= math.pi/24
+        app.playerAngle -= math.pi/48
         if app.playerAngle < 0:
             app.playerAngle += 2*math.pi
         dx, dy = app.playerMove
@@ -212,7 +212,7 @@ def keyPressed(app, event):
         app.playerMove = (10*dx, 10*dy)
    
     elif event.key == 'Right':
-        app.playerAngle += math.pi/24
+        app.playerAngle += math.pi/48
         if app.playerAngle > 2*math.pi:
             app.playerAngle -= 2*math.pi
         dx, dy = app.playerMove
@@ -234,11 +234,13 @@ def draw3D(app, canvas):
     dx = app.width / app.numRays
     for i, ray in enumerate(app.rays):
         distanceToWall = ray.getDistance()
+        color = f'#00{hex(int(255*(app.cellHeight/distanceToWall)))[-2:]}00'
+        print(color)
         height = wallHeight/distanceToWall*constant
         y0 = midpoint - height/2
         y1 = midpoint + height/2
         x0 = dx * i
         x1 = dx * (i + 1)
-        canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue', outline = '')
+        canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
 
 runApp(width=500,height=500)
