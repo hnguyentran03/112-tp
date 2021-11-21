@@ -8,10 +8,13 @@ class Player():
         cx, cy = (x1 + x0) / 2, (y1 + y0) / 2
         self.location = (cx, cy)
         self.angle = 0
-        self.distance = 5
-        self.dangle = 0.2
-        self.dx = self.distance * math.cos(self.angle)
-        self.dy = self.distance * math.sin(self.angle)
+        self.step = (app.cellHeight/len(app.maze))/5
+        if self.step > 0:
+            self.turn = int(self.step)-1
+        else:
+            self.turn = int(self.step)
+        self.move = (self.step * math.cos(self.angle), self.step * math.sin(self.angle))
+
 
     #Gets the current cell the player is in
     def checkLocation(self):
@@ -48,32 +51,45 @@ class Player():
     #Moving the player
     def moveWithKeys(self, event):
         #Moving
-        if event.key == 'Up':
-            self.movePlayer(1)
-        elif event.key == 'Down':
-            self.movePlayer(-1)
+        if event.key == 'w':
+            self.movePlayer(1, 'Up')
+        elif event.key == 's':
+            self.movePlayer(-1, 'Down')
+        elif event.key == 'a':
+            self.movePlayer(-1, 'Left')
+        elif event.key == 'd':
+            self.movePlayer(1, 'Right')
         
         #Turning
-        elif event.key == 'Left':
-            self.angle -= self.dangle
+        if event.key == 'Left':
+            self.angle -= math.pi/(3*(2**self.turn))
             if self.angle < 0:
-                self.angle += 2 * math.pi
-            self.dx = self.distance * math.cos(self.angle)
-            self.dy = self.distance * math.sin(self.angle)
-        
-        elif event.key == 'Right':
-            self.angle += self.dangle
-            if self.angle < 0:
-                self.angle += 2 * math.pi
-            self.dx = self.distance * math.cos(self.angle)
-            self.dy = self.distance * math.sin(self.angle)
+                self.angle += 2*math.pi
+            dx, dy = self.move
+            dx = math.cos(self.angle)
+            dy = math.sin(self.angle)
+            self.move = (self.step*dx, self.step*dy)
     
-    def movePlayer(self, direction):
+        elif event.key == 'Right':
+            self.angle += math.pi/ (3*(2**self.turn))
+            if self.angle > 2*math.pi:
+                self.angle -= 2*math.pi
+            dx, dy = self.move
+            dx = math.cos(self.angle)
+            dy = math.sin(self.angle)
+            self.move = (self.step*dx, self.step*dy)
+
+    def movePlayer(self, direction, directionName):
         cx, cy = self.location
-        cx += self.dx * direction
-        cy += self.dy * direction
-        if self.isLegalPosition(cx, cy):
-            self.location = (cx, cy)
+        dx, dy = self.move
+        if directionName == 'Up' or directionName == 'Down':
+            cx += dx * direction
+            cy += dy * direction
+        elif directionName == 'Left' or directionName == 'Right':
+            cx += dy * direction
+            cy += dx * direction
+        
+        self.location = (cx, cy)
 
     #Drawing the player
     def drawPlayer(self, canvas):
