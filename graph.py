@@ -126,9 +126,9 @@ class Maze(Graph):
             self.drawCell(canvas, row, col)
     
     def render(self, canvas):
-        self.drawMaze(canvas)
-        self.drawEdges(canvas)
-        # self.drawListMaze(canvas)
+        # self.drawMaze(canvas)
+        # self.drawEdges(canvas)
+        self.drawListMaze(canvas)
 
 
 
@@ -150,17 +150,18 @@ class Maze(Graph):
         return x0, x1, y0, y1
 
     def convertTo2DList(self):
-        maze = [[None]*(self.cols*2-1) for _ in range(self.rows*2-1)]
+        maze = [[1]*(self.cols*2-1) for _ in range(self.rows*2-1)]
         for row, col in self.table:
-            maze[row*2][col*2] = (row, col)
+            maze[row*2][col*2] = 0
         for cell in self.table:
             row, col = cell
             neighbors = self.getNeighbors(cell)
             for neighbor in neighbors:
                 nrow, ncol = neighbor
                 drow, dcol = nrow - row, ncol - col
-                maze[row*2+drow][col*2+dcol] = 'path'
+                maze[row*2+drow][col*2+dcol] = 0
         self.listMaze = maze
+        return maze
 
     def drawListMaze(self, canvas):
         numRows = len(self.listMaze)
