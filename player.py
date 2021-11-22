@@ -1,5 +1,10 @@
 import math
 
+#HELPER
+def almostEqual(d1, d2):
+    epsilon = 10**-10
+    return (abs(d2 - d1) < epsilon)
+
 class Player():
     def __init__(self, app):
         #This seems weird
@@ -17,34 +22,31 @@ class Player():
 
 
     #Gets the current cell the player is in
-    def checkLocation(self):
-        cx, cy = self.location
-        gridWidth  = self.app.width - 2*self.app.margin
-        gridHeight = self.app.height - 2*self.app.margin
-        cellWidth = gridWidth / self.app.mazeGen.cols
-        cellHeight = gridHeight / self.app.mazeGen.rows
-        col = (cx - self.app.margin - self.app.cellMargin)/(cellWidth)
-        row = (cy - self.app.margin - self.app.cellMargin)/(cellHeight)
-        return int(row), int(col)
+    def checkLocation(self, cx, cy):
+        row = cy/self.app.cellHeight
+        #Calculates the row and col (because of precision errors)
+        if almostEqual(row, math.ceil(row)):
+            row = math.ceil(row)
+        else:
+            row = math.floor(row)
+
+        col = cx/self.app.cellWidth
+        if almostEqual(col, math.ceil(col)):
+            col = math.ceil(col)
+        else:
+            col = math.floor(col)
+
+        return row, col
     
-    def isLegalPosition(self, cx, cy):
-        # row, col = self.checkLocation()
-        # #Cell legality check
-        # x0, x1, y0, y1 = self.app.maze.getCellBounds(row, col)
-        # outOfCellBounds = cx < x0 or cx > x1 or cx < y0 or cx > y1
-        
-        # if not outOfCellBounds:
-        #     return True
-        
-        # for neighborRow, neighborCol in self.app.maze.getNeighbors((row, col)):
-        #         nx0, _, ny0, _ = self.app.maze.getCellBounds(neighborRow, neighborCol)
-                
-        #         outOfEdgeBounds = cx < x1 or cx > nx0 or cy < y1 or cy > ny0
-        #         if not outOfEdgeBounds:
-        #             return True
-        
-        # return False
-        return True
+    def isIllegalPosition(self, cx, cy):
+        row, col = self.checkLocation(cx, cy)
+
+        outOfBounds = not(0 <= row < len(self.app.maze)) or not(0 <= col < len(self.app.maze))
+        if  outOfBounds or self.app.maze[row][col] == 1:
+            return True
+        else:
+            return False
+
 
 
     #Angle to turn taken from https://www.youtube.com/watch?v=gYRrGTC7GtA
@@ -97,10 +99,11 @@ class Player():
         
         #FIX
         elif directionName == 'Left' or directionName == 'Right':
-            cx += dx * direction * math.cos(math.pi/2)
-            cy += dx * direction * math.sin(math.pi/2)
+            cx += dy * direction
+            cy += dx * direction
         
-        self.location = (cx, cy)
+        if not self.isIllegalPosition(cx, cy):
+            self.location = (cx, cy)
 
     #Drawing the player
     def drawPlayer(self, canvas):
@@ -110,4 +113,3 @@ class Player():
     
     def render(self, canvas):
         self.drawPlayer(canvas)
-
