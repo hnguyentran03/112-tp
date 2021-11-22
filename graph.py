@@ -96,47 +96,11 @@ class Maze(Graph):
                         return result
             return None
 
-    #Drawing
-    def getCellBounds(self, row, col):
-        #Taken from 112 Notes/Lecture (also what do we do about the app.table)
-        gridWidth  = self.app.width - 2*self.app.margin
-        gridHeight = self.app.height - 2*self.app.margin
-        cellWidth = gridWidth / self.app.mazeGen.cols
-        cellHeight = gridHeight / self.app.mazeGen.rows
-        x0 = self.app.margin + col * cellWidth + self.app.cellMargin
-        x1 = self.app.margin + (col+1) * cellWidth - self.app.cellMargin
-        y0 = self.app.margin + row * cellHeight + self.app.cellMargin
-        y1 = self.app.margin + (row+1) * cellHeight - self.app.cellMargin
-        return x0, x1, y0, y1
-                
+    #Drawing    
     def drawCell(self, canvas, row, col, color = 'white'):
         x0, x1, y0, y1 = self.getCellBounds(row, col)
         canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
     
-    def drawEdges(self,canvas):
-        for row, col in self.table:
-            for neighborRow, neighborCol in self.getNeighbors((row, col)):
-                #Gets the edges of both cell and neighbor and make a rectangle to fill in
-                _, x1, _, y1 = self.getCellBounds(row, col)
-                nx0, _, ny0, _ = self.getCellBounds(neighborRow, neighborCol)
-                canvas.create_rectangle(nx0, ny0, x1, y1, fill = 'white', outline = '')
-
-    def drawMaze(self, canvas):
-        for row, col in self.table:
-            self.drawCell(canvas, row, col)
-    
-    def render(self, canvas):
-        # self.drawMaze(canvas)
-        # self.drawEdges(canvas)
-        self.drawListMaze(canvas)
-
-
-
-
-
-
-
-
     def getCellBounds2(self, row, col):
         #Taken from 112 Notes/Lecture (also what do we do about the app.table)
         gridWidth  = self.app.width - 2*self.app.margin
@@ -150,9 +114,14 @@ class Maze(Graph):
         return x0, x1, y0, y1
 
     def convertTo2DList(self):
+        #All walls
         maze = [[1]*(self.cols*2-1) for _ in range(self.rows*2-1)]
+        
+        #Puts all cells into the maze
         for row, col in self.table:
             maze[row*2][col*2] = 0
+
+        #Makes paths between cells
         for cell in self.table:
             row, col = cell
             neighbors = self.getNeighbors(cell)
@@ -174,6 +143,41 @@ class Maze(Graph):
                 x0, x1, y0, y1 = self.getCellBounds2(row, col)
                 canvas.create_rectangle(x0, y0, x1, y1, fill = color)
 
+    def render(self, canvas):
+        # self.drawMaze(canvas)
+        # self.drawEdges(canvas)
+        self.drawListMaze(canvas)
+
+
+
+    '''
+    OLD MAZE GENERATION STYLE
+
+    def getCellBounds(self, row, col):
+        #Taken from 112 Notes/Lecture (also what do we do about the app.table)
+        gridWidth  = self.app.width - 2*self.app.margin
+        gridHeight = self.app.height - 2*self.app.margin
+        cellWidth = gridWidth / self.app.mazeGen.cols
+        cellHeight = gridHeight / self.app.mazeGen.rows
+        x0 = self.app.margin + col * cellWidth + self.app.cellMargin
+        x1 = self.app.margin + (col+1) * cellWidth - self.app.cellMargin
+        y0 = self.app.margin + row * cellHeight + self.app.cellMargin
+        y1 = self.app.margin + (row+1) * cellHeight - self.app.cellMargin
+        return x0, x1, y0, y1
+
+
+    def drawEdges(self,canvas):
+        for row, col in self.table:
+            for neighborRow, neighborCol in self.getNeighbors((row, col)):
+                #Gets the edges of both cell and neighbor and make a rectangle to fill in
+                _, x1, _, y1 = self.getCellBounds(row, col)
+                nx0, _, ny0, _ = self.getCellBounds(neighborRow, neighborCol)
+                canvas.create_rectangle(nx0, ny0, x1, y1, fill = 'white', outline = '')
+
+    def drawMaze(self, canvas):
+        for row, col in self.table:
+            self.drawCell(canvas, row, col)
+    '''
 
 def repr2dList(L):
     if (L == []): return '[]'
