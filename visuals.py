@@ -8,7 +8,7 @@ def appStarted(app):
     app.player = Player(app)
     app.path = False
     app.state = False
-    app.numRays = int(len(app.maze)*10)
+    app.numRays = 100
     createRays(app)
 
 def cellDimension(app):
@@ -22,7 +22,7 @@ def cellDimension(app):
 Generation
 '''
 def generateMaze(app):
-    rows = cols = 5
+    rows = cols = 10
     app.margin = 0
     app.cellMargin = 0
     app.mazeGen = Maze(app)
@@ -79,21 +79,21 @@ Drawing
 '''
 def draw3D(app, canvas):
     wallHeight = 200
-    constant = 255
+    constant = 1/app.mazeGen.rows * 500
     midpoint = app.height/2
-    dx = app.width / app.numRays
+    dx = app.width / (2*app.numRays)
     
     for i, ray in enumerate(app.rays):
         distanceToWall = ray.getDistance()
+
+        height = wallHeight/(distanceToWall)*constant
+        colorDec =int(16+239*(height/app.height))
         
-        try:
-            color = f'#00{hex(int(255*(app.cellHeight/distanceToWall)))[-2:]}00'
-            height = wallHeight/(distanceToWall)*constant
-        except ZeroDivisionError:
-            color = f'#00{hex(int(255*(app.cellHeight/(distanceToWall+1))))[-2:]}00'
-            height = wallHeight/(distanceToWall+1)*constant
+        if colorDec > 255:
+            colorDec = 255
         
-        #Caulculates the line
+        color = f'#00{hex(colorDec)[-2:]}00'
+
         y0 = midpoint - height/2
         y1 = midpoint + height/2
         x0 = dx * i
@@ -101,10 +101,10 @@ def draw3D(app, canvas):
 
         canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
 
+'''
 def drawPath(app, canvas):
     path = app.mazeGen.getPath(app.player.checkLocation(), (app.mazeGen.rows-1, app.mazeGen.cols-1))
     for row, col in path:
-        
         x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row, col)
         cx, cy = (x1 + x0)/2, (y1 + y0)/2
 
@@ -112,10 +112,10 @@ def drawPath(app, canvas):
         nx0, nx1, ny0, ny1 = app.mazeGen.getCellBounds2(nrow, ncol)
         ncx, ncy = (nx1 + nx0)/2, (ny1 + ny0)/2
         canvas.create_line(cx, cy, ncx, ncy, fill = 'blue', width = 5)
+'''
+
 
 def redrawAll(app, canvas):
-    if app.path:
-        drawPath(app, canvas)
     if app.state:
         draw3D(app, canvas)
 
@@ -124,6 +124,8 @@ def redrawAll(app, canvas):
         app.player.render(canvas)
         for ray in app.rays:
             ray.render(canvas)
+        # if app.path:
+        #     drawPath(app, canvas)
 
 runApp(width=500,height=500)
 
