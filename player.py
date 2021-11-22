@@ -4,11 +4,11 @@ class Player():
     def __init__(self, app):
         #This seems weird
         self.app = app
-        x0, x1, y0, y1 = app.maze.getCellBounds(0, 0)
+        x0, x1, y0, y1 = app.mazeGen.getCellBounds2(0, 0)
         cx, cy = (x1 + x0) / 2, (y1 + y0) / 2
         self.location = (cx, cy)
-        self.angle = 0
-        self.step = (app.cellHeight/len(app.maze))/5
+        self.angle = math.pi/2
+        self.step = (app.cellHeight/5)
         if self.step > 0:
             self.turn = int(self.step)-1
         else:
@@ -21,8 +21,8 @@ class Player():
         cx, cy = self.location
         gridWidth  = self.app.width - 2*self.app.margin
         gridHeight = self.app.height - 2*self.app.margin
-        cellWidth = gridWidth / self.app.maze.cols
-        cellHeight = gridHeight / self.app.maze.rows
+        cellWidth = gridWidth / self.app.mazeGen.cols
+        cellHeight = gridHeight / self.app.mazeGen.rows
         col = (cx - self.app.margin - self.app.cellMargin)/(cellWidth)
         row = (cy - self.app.margin - self.app.cellMargin)/(cellHeight)
         return int(row), int(col)
@@ -62,7 +62,7 @@ class Player():
         
         #Turning
         if event.key == 'Left':
-            self.angle -= math.pi/(3*(2**self.turn))
+            self.angle -= math.pi/(3*(2**4))
             if self.angle < 0:
                 self.angle += 2*math.pi
             dx, dy = self.move
@@ -71,7 +71,7 @@ class Player():
             self.move = (self.step*dx, self.step*dy)
     
         elif event.key == 'Right':
-            self.angle += math.pi/ (3*(2**self.turn))
+            self.angle += math.pi/ (3*(2**4))
             if self.angle > 2*math.pi:
                 self.angle -= 2*math.pi
             dx, dy = self.move
@@ -86,8 +86,8 @@ class Player():
             cx += dx * direction
             cy += dy * direction
         elif directionName == 'Left' or directionName == 'Right':
-            cx += dy * direction
-            cy += dx * direction
+            cx += dx * direction * math.cos(math.pi/2)
+            cy += dx * direction * math.sin(math.pi/2)
         
         self.location = (cx, cy)
 
@@ -96,7 +96,6 @@ class Player():
         cx, cy = self.location
         r = 5
         canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill = 'red', outline = 'red')
-        canvas.create_line(cx, cy, cx+self.dx, cy + self.dy, fill = 'red', width = 3)
     
     def render(self, canvas):
         self.drawPlayer(canvas)
