@@ -47,7 +47,7 @@ class Player():
         return True
 
 
-    
+    #Angle to turn taken from https://www.youtube.com/watch?v=gYRrGTC7GtA
     #Moving the player
     def moveWithKeys(self, event):
         #Moving
@@ -63,8 +63,12 @@ class Player():
         #Turning
         if event.key == 'Left':
             self.angle -= math.pi/(3*(2**4))
+            
+            #Accounts for overangling
             if self.angle < 0:
                 self.angle += 2*math.pi
+            
+            #Calculations from angle to movement
             dx, dy = self.move
             dx = math.cos(self.angle)
             dy = math.sin(self.angle)
@@ -72,8 +76,12 @@ class Player():
     
         elif event.key == 'Right':
             self.angle += math.pi/ (3*(2**4))
+            
+            #Accounts for overangling
             if self.angle > 2*math.pi:
                 self.angle -= 2*math.pi
+            
+            #Calculations from angle to movement
             dx, dy = self.move
             dx = math.cos(self.angle)
             dy = math.sin(self.angle)
@@ -82,9 +90,12 @@ class Player():
     def movePlayer(self, direction, directionName):
         cx, cy = self.location
         dx, dy = self.move
+        
         if directionName == 'Up' or directionName == 'Down':
             cx += dx * direction
             cy += dy * direction
+        
+        #FIX
         elif directionName == 'Left' or directionName == 'Right':
             cx += dx * direction * math.cos(math.pi/2)
             cy += dx * direction * math.sin(math.pi/2)
@@ -94,7 +105,7 @@ class Player():
     #Drawing the player
     def drawPlayer(self, canvas):
         cx, cy = self.location
-        r = 5
+        r = self.app.cellHeight/10
         canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill = 'red', outline = 'red')
     
     def render(self, canvas):
