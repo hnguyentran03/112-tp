@@ -36,6 +36,7 @@ def createRays(app):
         
         leftAngle = app.player.angle-angleDifference
         rightAngle = app.player.angle+angleDifference
+        
         if leftAngle < 0: leftAngle += 2*math.pi
         elif leftAngle > 2*math.pi: leftAngle -= 2*math.pi
         if rightAngle < 0: rightAngle += 2*math.pi
@@ -43,7 +44,11 @@ def createRays(app):
 
         leftRay = Ray(app, leftAngle)
         rightRay = Ray(app, rightAngle)
+        
+        #Adds the ray to the far left
         app.rays.insert(0, leftRay)
+
+        #Adds a ray to the far right
         app.rays.append(rightRay)
 
 '''
@@ -77,18 +82,23 @@ def draw3D(app, canvas):
     constant = 255
     midpoint = app.height/2
     dx = app.width / app.numRays
+    
     for i, ray in enumerate(app.rays):
         distanceToWall = ray.getDistance()
+        
         try:
             color = f'#00{hex(int(255*(app.cellHeight/distanceToWall)))[-2:]}00'
             height = wallHeight/(distanceToWall)*constant
         except ZeroDivisionError:
             color = f'#00{hex(int(255*(app.cellHeight/(distanceToWall+1))))[-2:]}00'
             height = wallHeight/(distanceToWall+1)*constant
+        
+        #Caulculates the line
         y0 = midpoint - height/2
         y1 = midpoint + height/2
         x0 = dx * i
         x1 = dx * (i + 1)
+
         canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
 
 def drawPath(app, canvas):
