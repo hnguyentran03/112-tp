@@ -101,8 +101,8 @@ class Maze(Graph):
         #Taken from 112 Notes/Lecture (also what do we do about the app.table)
         gridWidth  = self.app.width - 2*self.app.margin
         gridHeight = self.app.height - 2*self.app.margin
-        cellWidth = gridWidth / self.app.maze.cols
-        cellHeight = gridHeight / self.app.maze.rows
+        cellWidth = gridWidth / self.app.mazeGen.cols
+        cellHeight = gridHeight / self.app.mazeGen.rows
         x0 = self.app.margin + col * cellWidth + self.app.cellMargin
         x1 = self.app.margin + (col+1) * cellWidth - self.app.cellMargin
         y0 = self.app.margin + row * cellHeight + self.app.cellMargin
@@ -169,7 +169,7 @@ class Maze(Graph):
         for row in range(numRows):
             for col in range(numCols):
                 color = 'white'
-                if self.listMaze[row][col] is None:
+                if self.listMaze[row][col] == 1:
                     color = 'black'
                 x0, x1, y0, y1 = self.getCellBounds2(row, col)
                 canvas.create_rectangle(x0, y0, x1, y1, fill = color)
