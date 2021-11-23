@@ -14,27 +14,20 @@ class Player():
         self.location = (cx, cy)
         self.angle = math.pi/2
         self.step = (app.cellHeight/5)
-        if self.step > 0:
-            self.turn = int(self.step)-1
-        else:
-            self.turn = int(self.step)
         self.move = (self.step * math.cos(self.angle), self.step * math.sin(self.angle))
 
 
     #Gets the current cell the player is in
     def checkLocation(self, cx, cy):
         row = cy/self.app.cellHeight
+        
         #Calculates the row and col (because of precision errors)
-        if almostEqual(row, math.ceil(row)):
-            row = math.ceil(row)
-        else:
-            row = math.floor(row)
+        if almostEqual(row, math.ceil(row)): row = math.ceil(row)
+        else: row = math.floor(row)
 
         col = cx/self.app.cellWidth
-        if almostEqual(col, math.ceil(col)):
-            col = math.ceil(col)
-        else:
-            col = math.floor(col)
+        if almostEqual(col, math.ceil(col)): col = math.ceil(col)
+        else: col = math.floor(col)
 
         return row, col
     
@@ -42,10 +35,8 @@ class Player():
         row, col = self.checkLocation(cx, cy)
 
         outOfBounds = not(0 <= row < len(self.app.maze)) or not(0 <= col < len(self.app.maze))
-        if  outOfBounds or self.app.maze[row][col] == 1:
-            return True
-        else:
-            return False
+        if  outOfBounds or self.app.maze[row][col] == 1: return True
+        else: return False
 
 
 
@@ -64,11 +55,10 @@ class Player():
         
         #Turning
         if event.key == 'Left':
-            self.angle -= math.pi/(3*(2**4))
+            self.angle -= math.pi/(3*(2**3))
             
             #Accounts for overangling
-            if self.angle < 0:
-                self.angle += 2*math.pi
+            if self.angle < 0: self.angle += 2*math.pi
             
             #Calculations from angle to movement
             dx, dy = self.move
@@ -77,7 +67,7 @@ class Player():
             self.move = (self.step*dx, self.step*dy)
     
         elif event.key == 'Right':
-            self.angle += math.pi/ (3*(2**4))
+            self.angle += math.pi/ (3*(2**3))
             
             #Accounts for overangling
             if self.angle > 2*math.pi:
