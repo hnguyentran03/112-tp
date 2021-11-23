@@ -1,6 +1,7 @@
 from graph import *
 from player import *
 from ray import *
+from sprite import *
 import random
 
 def appStarted(app):
@@ -17,12 +18,18 @@ def cellDimension(app):
     app.cellWidth = gridWidth / len(app.maze[0])
     app.cellHeight = gridHeight / len(app.maze)
 
+def normalize(row, col):
+    if row % 2 == 1: row -= 1
+    if col %2 == 1: col -= 1
+
+    return row//2, col//2
+
 
 '''
 Generation
 '''
 def generateMaze(app):
-    rows = cols = 5
+    rows = cols = 10
     app.clearMaze = False
     app.getKey = False
     app.margin = 0
@@ -32,7 +39,23 @@ def generateMaze(app):
     app.maze = app.mazeGen.convertTo2DList()
     cellDimension(app)
     app.player = Player(app)
+
+    app.enemies = []
+    makeEnemy(app)
+
     mazeExit(app)
+
+def makeEnemy(app):
+    row, col = random.randrange(1,len(app.maze)), random.randrange(1, len(app.maze[0]))
+    x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row, col)
+    enemy = Enemy(app, ((x0+x1)/2, (y0+y1)/2))
+    
+    while app.maze[row][col] == 1:
+        row, col = random.randrange(1,len(app.maze)), random.randrange(1, len(app.maze[0]))
+        x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row, col)
+        enemy = Enemy(app, ((x0+x1)/2, (y0+y1)/2))
+
+    app.enemies.append(enemy)
 
 def createRays(app):
     app.rays = []
@@ -59,9 +82,11 @@ def createRays(app):
 def mazeExit(app):
     endRow, endCol = len(app.maze)-1, len(app.maze[0])-1
     app.endLocation = endRow, endCol
-    keyRow, keyCol = random.randrange(endRow), random.randrange(endCol)
+    keyRow, keyCol = random.randrange(app.mazeGen.rows), random.randrange(app.mazeGen.cols)
+    keyRow, keyCol = keyRow*2, keyCol*2
     while app.maze[keyRow][keyRow] == 1:
-        keyRow, keyCol = random.randrange(endRow), random.randrange(endCol)
+        keyRow, keyCol = random.randrange(app.mazeGen.rows), random.randrange(app.mazeGen.cols)
+        keyRow, keyCol = keyRow*2, keyCol*2
     app.keyLocation = keyRow, keyCol
     app.maze[keyRow][keyCol] = 3
     app.maze[endRow][endCol] = 2
@@ -107,6 +132,9 @@ def timerFired(app):
         app.maze[keyRow][keyCol] = 0
     if playerLocation == app.endLocation and app.getKey:
         app.clearMaze = True
+    
+    for enemy in app.enemies:
+        enemy.getPath()
 
 '''
 Drawing
@@ -145,11 +173,7 @@ def draw3D(app, canvas):
 def drawPath(app, canvas, endRow, endCol):
     px, py = app.player.location
     prow, pcol = app.player.checkLocation(px, py)
-    
-    if prow % 2 == 1: prow -= 1
-    if pcol %2 == 1: pcol -= 1
-
-    prow, pcol = prow/2, pcol/2
+    prow, pcol = normalize(prow, pcol)
 
     path = app.mazeGen.getPath((prow, pcol), (endRow, endCol))
     for row, col in path:
@@ -177,21 +201,31 @@ def redrawAll(app, canvas):
     if app.splash:
         drawSplashScreen(app, canvas)
     else:
-        canvas.create_rectangle(0, 0, app.width, app.height, fill = 'black')
+        canvas.create_rectangle(0, 0, app.width, app.height, fill = 'white')
         if app.clearMaze:
                 drawMazeClear(app, canvas)
         else:
+            
             if app.state:
                 draw3D(app, canvas)
             else:
                 app.mazeGen.render(canvas)
                 for ray in app.rays:
                     ray.render(canvas)
+                
+                for enemy in app.enemies:
+                    enemy.render(canvas)
+
                 if app.path:
-                    drawPath(app, canvas, app.mazeGen.rows-1, app.mazeGen.cols-1)
+                    if app.getKey:
+                        drawPath(app, canvas, app.mazeGen.rows-1, app.mazeGen.cols-1)
+                    else:
+                        keyRow, keyCol = app.keyLocation
+                        keyRow, keyCol = normalize(keyRow, keyCol)
+                        drawPath(app, canvas, keyRow, keyCol)
                 app.player.render(canvas)
 
-runApp(width=800,height=800)
+runApp(width=500,height=500)
 
 
 
