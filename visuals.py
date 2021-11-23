@@ -86,6 +86,13 @@ def draw3D(app, canvas):
     for i, ray in enumerate(app.rays):
         distanceToWall = ray.getDistance()
 
+        wallAngle = app.player.angle - ray.angle
+
+        if wallAngle < 0: wallAngle += 2*math.pi
+        elif wallAngle > 2*math.pi: wallAngle -= 2*math.pi
+        
+        distanceToWall *= math.cos(wallAngle)
+
         height = wallHeight/(distanceToWall)*constant
         colorDec =int(16+239*(height/app.height))
         
@@ -101,21 +108,28 @@ def draw3D(app, canvas):
 
         canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
 
-'''
-def drawPath(app, canvas):
-    path = app.mazeGen.getPath(app.player.checkLocation(), (app.mazeGen.rows-1, app.mazeGen.cols-1))
+
+def drawPath(app, canvas, endRow, endCol):
+    px, py = app.player.location
+    prow, pcol = app.player.checkLocation(px, py)
+    
+    if prow % 2 == 1: prow -= 1
+    if pcol %2 == 1: pcol -= 1
+
+    path = app.mazeGen.getPath((), (endRow, endCol))
     for row, col in path:
-        x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row, col)
+        x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row*2, col*2)
         cx, cy = (x1 + x0)/2, (y1 + y0)/2
 
         nrow, ncol = path[(row, col)]
-        nx0, nx1, ny0, ny1 = app.mazeGen.getCellBounds2(nrow, ncol)
+        nx0, nx1, ny0, ny1 = app.mazeGen.getCellBounds2(nrow*2, ncol*2)
         ncx, ncy = (nx1 + nx0)/2, (ny1 + ny0)/2
         canvas.create_line(cx, cy, ncx, ncy, fill = 'blue', width = 5)
-'''
+
 
 
 def redrawAll(app, canvas):
+    canvas.create_rectangle(0, 0, app.width, app.height, fill = 'black')
     if app.state:
         draw3D(app, canvas)
 
@@ -124,8 +138,8 @@ def redrawAll(app, canvas):
         app.player.render(canvas)
         for ray in app.rays:
             ray.render(canvas)
-        # if app.path:
-        #     drawPath(app, canvas)
+        if app.path:
+            drawPath(app, canvas, 5, 5)
 
 runApp(width=500,height=500)
 
