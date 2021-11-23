@@ -112,16 +112,12 @@ class Ray():
         row = rayY/self.app.cellHeight
         
         #Calculates the row and col (because of precision errors)
-        if almostEqual(row, math.ceil(row)):
-            row = math.ceil(row)
-        else:
-            row = math.floor(row)
+        if almostEqual(row, math.ceil(row)): row = math.ceil(row)
+        else: row = math.floor(row)
 
         col = rayX/self.app.cellWidth
-        if almostEqual(col, math.ceil(col)):
-            col = math.ceil(col)
-        else:
-            col = math.floor(col)
+        if almostEqual(col, math.ceil(col)): col = math.ceil(col)
+        else: col = math.floor(col)
         
         #Recalculates the row and col based on which direction
         if direction == 'Up':
@@ -135,10 +131,8 @@ class Ray():
         else: return True
         
         outOfBounds = not(0 <= row < len(self.app.maze)) or not(0 <= col < len(self.app.maze))
-        if  outOfBounds or self.app.maze[row][col] == 1:
-            return True
-        else:
-            return False
+        if  outOfBounds or self.app.maze[row][col] == 1: return True
+        else: return False
     
     def render(self, canvas):
         cx, cy = self.app.player.location
