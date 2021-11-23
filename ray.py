@@ -136,4 +136,4 @@ class Ray():
     
     def render(self, canvas):
         cx, cy = self.app.player.location
-        canvas.create_line(cx, cy, cx+self.rayX, cy+self.rayY, fill = 'purple')
+        canvas.create_line(cx, cy, cx+self.rayX, cy+self.rayY, fill = 'yellow')
