@@ -99,8 +99,8 @@ class Player():
         
         #FIX
         elif directionName == 'Left' or directionName == 'Right':
-            cx += dy * direction
-            cy += dx * direction
+            cx += (dy * direction * -1)/2
+            cy += (dx * direction)/2
         
         if not self.isIllegalPosition(cx, cy):
             self.location = (cx, cy)
