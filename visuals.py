@@ -4,6 +4,7 @@ from ray import *
 import random
 
 def appStarted(app):
+    app.splash = True
     generateMaze(app)
     app.path = False
     app.state = False
@@ -65,6 +66,13 @@ def mazeExit(app):
     app.maze[keyRow][keyCol] = 3
     app.maze[endRow][endCol] = 2
 
+def startButtonBounds(app):
+    x0 = app.width * 2/5
+    x1 = app.width * 3/5
+    y0 = app.height * 3/5
+    y1 = app.height * 4/5
+    return x0, x1, y0, y1
+
 '''
 Movement
 '''
@@ -81,6 +89,11 @@ def keyPressed(app, event):
 
     if event.key == 'l':
         app.state = not app.state
+
+def mousePressed(app, event):
+    x0, x1, y0, y1 = startButtonBounds(app)
+    if x0 < event.x < x1 and y0 < event.y < y1:
+        app.splash = False
 
 '''
 Timer
@@ -129,7 +142,6 @@ def draw3D(app, canvas):
 
         canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
 
-
 def drawPath(app, canvas, endRow, endCol):
     px, py = app.player.location
     prow, pcol = app.player.checkLocation(px, py)
@@ -152,23 +164,32 @@ def drawPath(app, canvas, endRow, endCol):
 def drawMazeClear(app, canvas):
     height = app.height/4
     canvas.create_rectangle(0, app.height/2-height, app.width, app.height/2+height, fill = 'black')
-    canvas.create_text(app.height/2, app.width/2, text = 'Maze Clear', font = f'Arial {app.height//10} bold', fill = 'yellow')
-    pass
+    canvas.create_text(app.height/2, app.width/2, text = 'Maze Clear', font = f'Arial {app.height//10} bold', fill = 'white')
+
+def drawSplashScreen(app, canvas):
+    x0, x1, y0, y1 = startButtonBounds(app)
+    canvas.create_rectangle(0, 0, app.width, app.height, fill = 'white')
+    canvas.create_text(app.width/2, app.height * 2/5, text = '112maze', font = f'Arial {app.height//10}', fill = 'black')
+    canvas.create_rectangle(x0, y0, x1, y1, fill = 'blue')
+    canvas.create_text((x0+x1)/2, (y0+y1)/2, text = 'Start', font = f'Arial {app.height//20}', fill = 'white')
 
 def redrawAll(app, canvas):
-    canvas.create_rectangle(0, 0, app.width, app.height, fill = 'black')
-    if app.clearMaze:
-            drawMazeClear(app, canvas)
+    if app.splash:
+        drawSplashScreen(app, canvas)
     else:
-        if app.state:
-            draw3D(app, canvas)
+        canvas.create_rectangle(0, 0, app.width, app.height, fill = 'black')
+        if app.clearMaze:
+                drawMazeClear(app, canvas)
         else:
-            app.mazeGen.render(canvas)
-            for ray in app.rays:
-                ray.render(canvas)
-            if app.path:
-                drawPath(app, canvas, app.mazeGen.rows-1, app.mazeGen.cols-1)
-            app.player.render(canvas)
+            if app.state:
+                draw3D(app, canvas)
+            else:
+                app.mazeGen.render(canvas)
+                for ray in app.rays:
+                    ray.render(canvas)
+                if app.path:
+                    drawPath(app, canvas, app.mazeGen.rows-1, app.mazeGen.cols-1)
+                app.player.render(canvas)
 
 runApp(width=800,height=800)
 
