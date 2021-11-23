@@ -20,7 +20,6 @@ class Player():
     #Gets the current cell the player is in
     def checkLocation(self, cx, cy):
         row = cy/self.app.cellHeight
-        
         #Calculates the row and col (because of precision errors)
         if almostEqual(row, math.ceil(row)): row = math.ceil(row)
         else: row = math.floor(row)
