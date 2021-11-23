@@ -143,7 +143,7 @@ class Maze(Graph):
                 elif self.listMaze[row][col] == 2:
                     color = 'blue'
                 elif self.listMaze[row][col] == 3:
-                    color = 'yellow'
+                    color = 'orange'
                 x0, x1, y0, y1 = self.getCellBounds2(row, col)
                 canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
 
