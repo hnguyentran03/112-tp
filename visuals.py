@@ -84,10 +84,12 @@ def mazeExit(app):
     app.endLocation = endRow, endCol
     keyRow, keyCol = random.randrange(app.mazeGen.rows), random.randrange(app.mazeGen.cols)
     keyRow, keyCol = keyRow*2, keyCol*2
+    
     while app.maze[keyRow][keyRow] == 1:
         keyRow, keyCol = random.randrange(app.mazeGen.rows), random.randrange(app.mazeGen.cols)
         keyRow, keyCol = keyRow*2, keyCol*2
     app.keyLocation = keyRow, keyCol
+    
     app.maze[keyRow][keyCol] = 3
     app.maze[endRow][endCol] = 2
 
@@ -126,10 +128,12 @@ Timer
 def timerFired(app):
     px, py = app.player.location
     playerLocation = app.player.checkLocation(px, py)
+    
     if playerLocation == app.keyLocation:
         app.getKey = True
         keyRow, keyCol = app.keyLocation
         app.maze[keyRow][keyCol] = 0
+    
     if playerLocation == app.endLocation and app.getKey:
         app.clearMaze = True
     
@@ -148,11 +152,10 @@ def draw3D(app, canvas):
     for i, ray in enumerate(app.rays):
         distanceToWall = ray.getDistance()
 
+        #Take out fisheye
         wallAngle = app.player.angle - ray.angle
-
         if wallAngle < 0: wallAngle += 2*math.pi
         elif wallAngle > 2*math.pi: wallAngle -= 2*math.pi
-        
         distanceToWall *= math.cos(wallAngle)
 
         height = wallHeight/(distanceToWall)*constant
@@ -180,9 +183,11 @@ def drawPath(app, canvas, endRow, endCol):
         x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row*2, col*2)
         cx, cy = (x1 + x0)/2, (y1 + y0)/2
 
+        #Next cell
         nrow, ncol = path[(row, col)]
         nx0, nx1, ny0, ny1 = app.mazeGen.getCellBounds2(nrow*2, ncol*2)
         ncx, ncy = (nx1 + nx0)/2, (ny1 + ny0)/2
+
         canvas.create_line(cx, cy, ncx, ncy, fill = 'blue', width = 5)
 
 def drawMazeClear(app, canvas):
@@ -226,9 +231,3 @@ def redrawAll(app, canvas):
                 app.player.render(canvas)
 
 runApp(width=500,height=500)
-
-
-
-
-
-
