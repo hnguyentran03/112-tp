@@ -11,15 +11,6 @@ def normalize(row, col):
 
     return row//2, col//2
 
-
-class Sprite():
-    def __init__(self, app, type, location):
-        self.app = app
-        self.type = type
-        self.location = location
-        # self.texture = texture
-        # self.state = state
-
 class Enemy():
     def __init__(self, app, location):
         self.app = app
@@ -40,7 +31,17 @@ class Enemy():
         return row, col
     
     def move(self):
-        pass
+        if self.path != {}:
+            cx, cy = self.location
+            crow, ccol = self.checkLocation(cx, cy)
+
+            crow, ccol = normalize(crow, ccol)
+
+            nrow, ncol = self.path.get((crow, ccol))
+            nx0, nx1, ny0, ny1 = self.app.mazeGen.getCellBounds2(nrow*2, ncol*2)
+            ncx, ncy = (nx1 + nx0)/2, (ny1 + ny0)/2
+
+            self.location = ncx, ncy
 
     def getPath(self):
         px, py = self.app.player.location
@@ -53,11 +54,11 @@ class Enemy():
         crow, ccol = normalize(crow, ccol)
 
         path = self.app.mazeGen.getPath((crow, ccol), (prow, pcol))
-        print(path)
+        self.path = path
 
     def drawEnemy(self, canvas):
         cx, cy = self.location
-        r = self.app.cellHeight/10
+        r = self.app.cellHeight/5
         canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill = 'purple', outline = 'purple')
     
     def render(self, canvas):
