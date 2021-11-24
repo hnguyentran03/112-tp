@@ -7,8 +7,7 @@ from graph import *
 import math
 
 #HELPER
-def almostEqual(d1, d2):
-    epsilon = 10**-10
+def almostEqual(d1, d2, epsilon = 10**-10):
     return (abs(d2 - d1) < epsilon)
 
 class Ray():
@@ -107,6 +106,23 @@ class Ray():
         else:
             self.rayX = horizontalRayX
             self.rayY = horizontalRayY
+
+    def hitEnemy(self, enemy):
+        x, y = enemy.location
+        cx, cy = self.app.player.location
+        rx, ry = cx+self.rayX, cy+self.rayY
+
+        crossProduct = (y - cy) * (rx - cx) - (x - cx) * (ry - cy)
+        if not almostEqual(crossProduct, 0, 10**2):
+            return False
+        
+        dotProductEnemy = (x - cx) * (rx - cx) + (y - cy) * (ry - cy)
+        dotProductRay = (rx - cx) * (rx - cx) + (ry - cy) * (ry - cy)
+
+        if dotProductEnemy < 0 or dotProductEnemy > dotProductRay:
+            return False
+        
+        return True
     
     def hitWall(self, rayX, rayY, direction):
         row = rayY/self.app.cellHeight
