@@ -97,7 +97,7 @@ class Player():
     #Drawing the player
     def drawPlayer(self, canvas):
         cx, cy = self.location
-        r = self.app.cellHeight/10
+        r = self.app.cellHeight/5
         canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill = 'red', outline = 'red')
     
     def render(self, canvas):
