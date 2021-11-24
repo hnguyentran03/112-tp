@@ -107,6 +107,8 @@ class Ray():
             self.rayX = horizontalRayX
             self.rayY = horizontalRayY
 
+    #Dot in line segment from https://lucidar.me/en/mathematics/check-if-a-point-belongs-on-a-line-segment/
+    #and  https://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
     def hitEnemy(self, enemy):
         x, y = enemy.location
         cx, cy = self.app.player.location
