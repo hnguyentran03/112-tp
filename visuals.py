@@ -12,11 +12,12 @@ def appStarted(app):
     app.path = False
     app.state = False
     app.numRays = 100
+    app.timerDelay = 10
     createRays(app)
 
 def cellDimension(app):
-    gridWidth  = app.width
-    gridHeight = app.height
+    gridWidth  = app.width/4
+    gridHeight = app.height/4
     app.cellWidth = gridWidth / len(app.maze[0])
     app.cellHeight = gridHeight / len(app.maze)
 
@@ -97,8 +98,11 @@ def createRays(app):
         app.rays.append(rightRay)
 
 def mazeExit(app):
+    #Creates the end goal
     endRow, endCol = len(app.maze)-1, len(app.maze[0])-1
     app.endLocation = endRow, endCol
+    
+    #Creates the key
     keyRow, keyCol = random.randrange(1, app.mazeGen.rows), random.randrange(1, app.mazeGen.cols)
     keyRow, keyCol = keyRow*2, keyCol*2
     
@@ -144,79 +148,100 @@ def timerFired(app):
         px, py = app.player.location
         playerLocation = app.player.checkLocation(px, py)
         
+        #Key collection
         if playerLocation == app.keyLocation and not app.getKey:
             app.getKey = True
             keyRow, keyCol = app.keyLocation
             app.maze[keyRow][keyCol] = 0
             makeEnemy(app)
         
+        #Goal check
         if playerLocation == app.endLocation and app.getKey:
+            app.splash = True
             app.clearMaze = True
             app.rows += 1
             app.cols += 1
             app.level += 1
             generateMaze(app)
         
+        checkEnemyCollision(app)
+
+        #Enemy movement
         app.timePassed += app.timerDelay
         if app.timePassed > app.enemyMove:
-            for i, enemy in enumerate(app.enemies):
+            for enemy in app.enemies:
                 enemy.getPath()
                 enemy.move()
-
-                checkEnemyCollision(app, enemy)
-
-                px, py = app.player.location
-                prow, pcol = app.player.checkLocation(px, py)
-                prow, pcol = normalize(prow, pcol)
-                playerPath = app.mazeGen.getPath((prow, pcol), (app.mazeGen.rows-1, app.mazeGen.cols-1))
-                enemy.getPath()
-                
-                #Subset check taken from https://stackoverflow.com/questions/49904181/python-checking-for-subdictionary/49904235
-                if set(enemy.path.items()).issubset(set(playerPath.items())):
-                    app.enemies.pop(i)
                 
             checkEnemies(app)
         
             app.timePassed = 0
 
+#Adds enemies and the ray that hits the enemy
 def checkEnemies(app):
     app.enemyRays = {}
-    for i, ray in enumerate(app.rays):
-        for j, enemy in enumerate(app.enemies):
+    for j, enemy in enumerate(app.enemies):
+        for i, ray in enumerate(app.rays):
             if ray.hitEnemy(enemy):
-                app.enemyRays[(i, ray)] = (j, enemy)
+                rays = app.enemyRays.get((j, enemy), set())
+                rays.add((i, ray))
+                app.enemyRays[(j, enemy)] = rays
 
-def checkEnemyCollision(app, enemy):
-    cx, cy = enemy.location
-    px, py = app.player.location
-    if app.player.checkLocation(px, py) == enemy.checkLocation(cx, cy):
-        app.gameOver = True
+def checkEnemyCollision(app):
+    for i, enemy in enumerate(app.enemies):
+        cx, cy = enemy.location
+        px, py = app.player.location
+        
+        #If the player is within the same row and col
+        if app.player.checkLocation(px, py) == enemy.checkLocation(cx, cy):
+            app.gameOver = True
+
+        px, py = app.player.location
+        prow, pcol = app.player.checkLocation(px, py)
+        prow, pcol = normalize(prow, pcol)
+        playerPath = app.mazeGen.getPath((prow, pcol), (app.mazeGen.rows-1, app.mazeGen.cols-1))
+        enemy.getPath()
+        
+        #Subset check taken from https://stackoverflow.com/questions/49904181/python-checking-for-subdictionary/49904235
+        if set(enemy.path.items()).issubset(set(playerPath.items())):
+            app.enemies.pop(i)
 
 '''
 Drawing
 '''
 def drawEnemies(app, canvas):
-    constant = 5000
+    constant = 1000
     midpoint = app.height/2
     dx = app.width / (2*app.numRays)
+
     for key, val in app.enemyRays.items():
-        i, ray = key
-        j, enemy = val
+        j, enemy = key
+        rays = val
+       
+        #Coordinates for enemy
         x, y = enemy.location
         cx, cy = app.player.location
         distance = ((cx-x)**2 + (cy-y)**2)**(1/2)
-        height = constant/(distance)
+        height = constant/(distance+0.01)
         y0 = midpoint - height/2
         y1 = midpoint + height/2
-        x0 = dx * i
-        x1 = dx * (i + 1)
+        
+        #Takes the middle ray to draw
+        avgI = 0
+        for i, ray in rays:
+            avgI += i
+        
+        avgI //= len(rays)
+        
+        x0 = dx * avgI
+        x1 = dx * (avgI + 1)
         canvas.create_line(x0, y0, x1, y1, fill = 'purple', width = height*len(app.enemyRays))
 
 
 #Drawing walls from https://permadi.com/1996/05/ray-casting-tutorial-9/
 def draw3D(app, canvas):
     wallHeight = 200
-    constant = 1/app.mazeGen.rows * 500
+    constant = 1/app.mazeGen.rows * 200
     midpoint = app.height/2
     dx = app.width / (2*app.numRays)
     
@@ -287,26 +312,23 @@ def redrawAll(app, canvas):
             drawMazeClear(app, canvas)
         elif app.gameOver:
             drawGameOver(app, canvas)
-        else:
+        else: 
+            draw3D(app, canvas)
+            drawEnemies(app, canvas)
+            app.mazeGen.render(canvas)
+            for ray in app.rays:
+                ray.render(canvas)
             
-            if app.state:
-                draw3D(app, canvas)
-                drawEnemies(app, canvas)
-            else:
-                app.mazeGen.render(canvas)
-                for ray in app.rays:
-                    ray.render(canvas)
-                
-                for enemy in app.enemies:
-                    enemy.render(canvas)
+            for enemy in app.enemies:
+                enemy.render(canvas)
 
-                if app.path:
-                    if app.getKey:
-                        drawPath(app, canvas, app.mazeGen.rows-1, app.mazeGen.cols-1)
-                    else:
-                        keyRow, keyCol = app.keyLocation
-                        keyRow, keyCol = normalize(keyRow, keyCol)
-                        drawPath(app, canvas, keyRow, keyCol)
-                app.player.render(canvas)
+            if app.path:
+                if app.getKey:
+                    drawPath(app, canvas, app.mazeGen.rows-1, app.mazeGen.cols-1)
+                else:
+                    keyRow, keyCol = app.keyLocation
+                    keyRow, keyCol = normalize(keyRow, keyCol)
+                    drawPath(app, canvas, keyRow, keyCol)
+            app.player.render(canvas)
 
 runApp(width=500,height=500)
