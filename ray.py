@@ -115,7 +115,7 @@ class Ray():
         rx, ry = cx+self.rayX, cy+self.rayY
 
         crossProduct = (y - cy) * (rx - cx) - (x - cx) * (ry - cy)
-        if not almostEqual(crossProduct, 0, 10**2):
+        if not almostEqual(crossProduct, 0, 10):
             return False
         
         dotProductEnemy = (x - cx) * (rx - cx) + (y - cy) * (ry - cy)
