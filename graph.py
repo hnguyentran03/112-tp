@@ -103,14 +103,14 @@ class Maze(Graph):
     
     def getCellBounds2(self, row, col):
         #Taken from 112 Notes/Lecture (also what do we do about the app.table)
-        gridWidth  = self.app.width - 2*self.app.margin
-        gridHeight = self.app.height - 2*self.app.margin
+        gridWidth  = self.app.width/4
+        gridHeight = self.app.height/4
         cellWidth = gridWidth / len(self.listMaze)
         cellHeight = gridHeight / len(self.listMaze[0])
-        x0 = self.app.margin + col * cellWidth
-        x1 = self.app.margin + (col+1) * cellWidth
-        y0 = self.app.margin + row * cellHeight
-        y1 = self.app.margin + (row+1) * cellHeight
+        x0 = col * cellWidth
+        x1 = (col+1) * cellWidth
+        y0 = row * cellHeight
+        y1 = (row+1) * cellHeight
         return x0, x1, y0, y1
 
     def convertTo2DList(self):
