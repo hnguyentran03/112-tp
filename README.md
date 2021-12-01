@@ -5,4 +5,4 @@ To run the project, run the visuals.py file. No libraries or additional files ne
 
 The controls are w,a,s,d to move up, left, down, right respectively. To turn your camera left and right, use the left and right arrow keys. To find the path to the next maze objective (a key or a goal), click p. To toggle the minimap, click m. To restart, click r.
 
-To skip to level 5, click 5.
+To skip to level 5 (for perfect maze generation), click 5.
