@@ -237,11 +237,11 @@ def checkEnemyCollision(app):
         px, py = app.player.location
         prow, pcol = app.player.checkLocation(px, py)
         prow, pcol = normalize(prow, pcol)
-        playerPath = app.mazeGen.getPath((prow, pcol), (app.mazeGen.rows-1, app.mazeGen.cols-1))
+        
+        playerPath = app.mazeGen.bfsGetPath((prow, pcol), (app.mazeGen.rows-1, app.mazeGen.cols-1))
         enemy.getPath()
         
-        #Subset check taken from https://stackoverflow.com/questions/49904181/python-checking-for-subdictionary/49904235
-        if set(enemy.path.items()).issubset(set(playerPath.items())):
+        if playerPath is None or enemy.path is None:
             app.enemies.pop(i)
 
 '''
@@ -362,17 +362,18 @@ def drawPath(app, canvas, endRow, endCol):
     prow, pcol = app.player.checkLocation(px, py)
     prow, pcol = normalize(prow, pcol)
 
-    path = app.mazeGen.getPath((prow, pcol), (endRow, endCol))
-    for row, col in path:
-        x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row*2, col*2)
-        cx, cy = (x1 + x0)/2, (y1 + y0)/2
+    path = app.mazeGen.bfsGetPath((prow, pcol), (endRow, endCol))
+    if path is not None:
+        for row, col in path:
+            x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row*2, col*2)
+            cx, cy = (x1 + x0)/2, (y1 + y0)/2
 
-        #Next cell
-        nrow, ncol = path.get((row, col))
-        nx0, nx1, ny0, ny1 = app.mazeGen.getCellBounds2(nrow*2, ncol*2)
-        ncx, ncy = (nx1 + nx0)/2, (ny1 + ny0)/2
+            #Next cell
+            nrow, ncol = path.get((row, col))
+            nx0, nx1, ny0, ny1 = app.mazeGen.getCellBounds2(nrow*2, ncol*2)
+            ncx, ncy = (nx1 + nx0)/2, (ny1 + ny0)/2
 
-        canvas.create_line(cx, cy, ncx, ncy, fill = 'blue', width = 5)
+            canvas.create_line(cx, cy, ncx, ncy, fill = 'blue', width = 5)
 
 def drawMazeClear(app, canvas):
     height = app.height/4
@@ -424,6 +425,5 @@ def redrawAll(app, canvas):
 
                 for enemy in app.enemies:
                     enemy.render(canvas)
-             
 
 runApp(width=500,height=500)
