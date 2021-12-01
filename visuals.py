@@ -5,14 +5,23 @@ from sprite import *
 import random
 
 def appStarted(app):
+    restartGame(app)
+
+    app.pauseTime = 0
+    app.totalPause = 500
+    app.timerDelay = 10
+
+def restartGame(app):
     app.splash = True
+    app.paused = False
     app.level = 1
     app.rows = app.cols = 5
     generateMaze(app)
+    app.minimap = True
     app.path = False
     app.state = False
     app.numRays = 100
-    app.timerDelay = 10
+    
     createRays(app)
 
 def cellDimension(app):
@@ -40,6 +49,8 @@ Generation
 '''
 def generateMaze(app):
     app.enemyRays = {}
+    app.goal = set()
+    app.key = set()
 
     app.timePassed = 0
     app.enemyMove = 500
@@ -52,7 +63,12 @@ def generateMaze(app):
     app.cellMargin = 0
     
     app.mazeGen = Maze(app)
-    app.mazeGen.dfsMaze(app.rows, app.cols)
+
+    mazeChoice = random.randrange(1,4)
+    if mazeChoice == 1: app.mazeGen.primsMaze(app.rows, app.cols)
+    elif mazeChoice == 2: app.mazeGen.kruskalMaze(app.rows, app.cols)
+    elif mazeChoice == 3: app.mazeGen.dfsMaze(app.rows, app.cols)
+
     app.maze = app.mazeGen.convertTo2DList()
     cellDimension(app)
     
@@ -120,8 +136,10 @@ Movement
 def keyPressed(app, event):
     if event.key == 'p':
         app.path = not app.path
+    elif event.key == 'm':
+        app.minimap = not app.minimap
     elif event.key == 'r':
-        generateMaze(app)
+        restartGame(app)
 
     #Moving
     app.player.moveWithKeys(event)
@@ -144,7 +162,7 @@ def mousePressed(app, event):
 Timer
 '''
 def timerFired(app):
-    if not app.splash:
+    if not app.splash and not app.paused:
         px, py = app.player.location
         playerLocation = app.player.checkLocation(px, py)
         
@@ -153,16 +171,19 @@ def timerFired(app):
             app.getKey = True
             keyRow, keyCol = app.keyLocation
             app.maze[keyRow][keyCol] = 0
-            makeEnemy(app)
+            for _ in range(app.level):
+                makeEnemy(app)
+        
+        checkKeyAndGoal(app)
         
         #Goal check
-        if playerLocation == app.endLocation and app.getKey:
-            app.splash = True
+        if playerLocation == app.endLocation and app.getKey and not app.clearMaze:
+            app.paused = True
             app.clearMaze = True
             app.rows += 1
             app.cols += 1
             app.level += 1
-            generateMaze(app)
+            app.enemyMove -= 10
         
         checkEnemyCollision(app)
 
@@ -176,6 +197,23 @@ def timerFired(app):
             checkEnemies(app)
         
             app.timePassed = 0
+    
+    if app.paused:
+        app.pauseTime += app.timerDelay
+        if app.pauseTime > app.totalPause:
+            app.pauseTime = 0
+            app.paused = not app.paused
+            generateMaze(app)
+
+#Adds rays that hit the goal and key into a set
+def checkKeyAndGoal(app):
+    app.goal = set()
+    app.key = set()
+    for i, ray in enumerate(app.rays):
+        if ray.hitGoal():
+            app.goal.add((i, ray))
+        if ray.hitKey():
+            app.key.add((i, ray))
 
 #Adds enemies and the ray that hits the enemy
 def checkEnemies(app):
@@ -209,8 +247,59 @@ def checkEnemyCollision(app):
 '''
 Drawing
 '''
+def drawEntities(app, canvas):
+    dx = app.width / (2*app.numRays)
+    
+    #Goal
+    if app.goal != set():
+        avgI = 0
+        for i, ray in app.goal:
+            #Takes the middle ray to draw
+            avgI += i
+            
+        avgI //= len(app.goal)
+        
+        grow, gcol = app.endLocation
+        x0, x1, y0, y1 = app.mazeGen.getCellBounds2(grow, gcol)
+        gx = (x1 + x0)/2
+        gy = (y1 + y0)/2
+        y0, y1, height = getEntityHeight(app, gx, gy)
+
+        x0 = dx * avgI
+        x1 = dx * (avgI + 1)
+        canvas.create_line(x0, y0, x1, y1, fill = 'blue', width = height)
+
+    #Key
+    if app.key != set():
+        avgI = 0
+        for i, ray in app.key:
+            #Takes the middle ray to draw
+            avgI += i
+            
+        avgI //= len(app.key)
+        
+        krow, kcol = app.keyLocation
+        x0, x1, y0, y1 = app.mazeGen.getCellBounds2(krow, kcol)
+        kx = (x1 + x0)/2
+        ky = (y1 + y0)/2
+        y0, y1, height = getEntityHeight(app, kx, ky)
+
+        x0 = dx * avgI
+        x1 = dx * (avgI + 1)
+        canvas.create_line(x0, y0, x1, y1, fill = 'orange', width = height)
+
+def getEntityHeight(app, x, y):
+    constant = 1000/app.level
+    midpoint = app.height/2
+    cx, cy = app.player.location
+    distance = ((cx-x)**2 + (cy-y)**2)**(1/2)
+    height = constant/(distance+0.01)
+    y0 = midpoint - height/2
+    y1 = midpoint + height/2
+    return y0, y1, height
+
 def drawEnemies(app, canvas):
-    constant = 1000
+    constant = 1000/app.level
     midpoint = app.height/2
     dx = app.width / (2*app.numRays)
 
@@ -236,7 +325,6 @@ def drawEnemies(app, canvas):
         x0 = dx * avgI
         x1 = dx * (avgI + 1)
         canvas.create_line(x0, y0, x1, y1, fill = 'purple', width = height*len(app.enemyRays))
-
 
 #Drawing walls from https://permadi.com/1996/05/ray-casting-tutorial-9/
 def draw3D(app, canvas):
@@ -289,12 +377,14 @@ def drawPath(app, canvas, endRow, endCol):
 def drawMazeClear(app, canvas):
     height = app.height/4
     canvas.create_rectangle(0, app.height/2-height, app.width, app.height/2+height, fill = 'black')
-    canvas.create_text(app.height/2, app.width/2, text = 'Maze Clear', font = f'Arial {app.height//10} bold', fill = 'white')
+    canvas.create_text(app.width/2, app.height/2, text = 'Level Clear', font = f'Arial {app.height//10} bold', fill = 'white')
+    canvas.create_text(app.width/2, app.height*2/3, text = f'You are moving to level {app.level}!', font = f'Arial {app.height//20}', fill = 'white')
 
 def drawGameOver(app, canvas):
     height = app.height/4
     canvas.create_rectangle(0, app.height/2-height, app.width, app.height/2+height, fill = 'black')
-    canvas.create_text(app.height/2, app.width/2, text = 'Game Over', font = f'Arial {app.height//10} bold', fill = 'white')
+    canvas.create_text(app.width/2, app.height/2, text = 'Game Over', font = f'Arial {app.height//10} bold', fill = 'white')
+    canvas.create_text(app.width/2, app.height*2/3, text = f'You got to level {app.level}!\nClick r to restart.', font = f'Arial {app.height//20}', fill = 'white')
 
 def drawSplashScreen(app, canvas):
     x0, x1, y0, y1 = startButtonBounds(app)
@@ -308,27 +398,32 @@ def redrawAll(app, canvas):
         drawSplashScreen(app, canvas)
     else:
         canvas.create_rectangle(0, 0, app.width, app.height, fill = 'white')
-        if app.clearMaze:
-            drawMazeClear(app, canvas)
-        elif app.gameOver:
+        if app.gameOver:
             drawGameOver(app, canvas)
+        elif app.clearMaze and app.paused:
+
+            drawMazeClear(app, canvas)
         else: 
             draw3D(app, canvas)
+            drawEntities(app, canvas)
             drawEnemies(app, canvas)
-            app.mazeGen.render(canvas)
-            for ray in app.rays:
-                ray.render(canvas)
-            
-            for enemy in app.enemies:
-                enemy.render(canvas)
 
-            if app.path:
-                if app.getKey:
-                    drawPath(app, canvas, app.mazeGen.rows-1, app.mazeGen.cols-1)
-                else:
-                    keyRow, keyCol = app.keyLocation
-                    keyRow, keyCol = normalize(keyRow, keyCol)
-                    drawPath(app, canvas, keyRow, keyCol)
-            app.player.render(canvas)
+            if app.minimap:
+                app.mazeGen.render(canvas)
+                for ray in app.rays:
+                    ray.render(canvas)
+
+                if app.path:
+                    if app.getKey:
+                        drawPath(app, canvas, app.mazeGen.rows-1, app.mazeGen.cols-1)
+                    else:
+                        keyRow, keyCol = app.keyLocation
+                        keyRow, keyCol = normalize(keyRow, keyCol)
+                        drawPath(app, canvas, keyRow, keyCol)
+                app.player.render(canvas)
+
+                for enemy in app.enemies:
+                    enemy.render(canvas)
+             
 
 runApp(width=500,height=500)
