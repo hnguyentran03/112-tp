@@ -107,13 +107,14 @@ class Maze(Graph):
             drow, dcol = direction
             neighbor = nrow, ncol = row+drow, col+dcol
             
-            isOutOfBounds = nrow < 0 or nrow >= self.rows or ncol < 0 or ncol >= self.cols
-            while neighbor in self.getNeighbors((row, col)) and isOutOfBounds:
+            while neighbor in self.getNeighbors((row, col)) or neighbor not in self.table:
                 direction = random.choice(possibleWalls)
                 drow, dcol = direction
                 neighbor = row+drow, col+dcol
             
             self.addEdge((row,col), neighbor)
+            print(self.table)
+            print()
 
     #Idea for Maze Generation from https://en.wikipedia.org/wiki/Maze_generation_algorithm
     #Makes a dfs Maze
