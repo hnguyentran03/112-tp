@@ -69,6 +69,11 @@ def generateMaze(app):
     elif mazeChoice == 2: app.mazeGen.kruskalMaze(app.rows, app.cols)
     elif mazeChoice == 3: app.mazeGen.dfsMaze(app.rows, app.cols)
 
+    paths = 5 - app.level
+    if paths < 0:
+        paths = 0
+    app.mazeGen.randomize(paths)
+
     app.maze = app.mazeGen.convertTo2DList()
     cellDimension(app)
     
@@ -80,11 +85,13 @@ def generateMaze(app):
     mazeExit(app)
 
 def makeEnemy(app):
+    px, py = app.player.location
+    prow, pcol = app.player.checkLocation(px, py)
     row, col = random.randrange(1,len(app.maze)), random.randrange(1, len(app.maze[0]))
     x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row, col)
     enemy = Enemy(app, ((x0+x1)/2, (y0+y1)/2))
     
-    while app.maze[row][col] == 1:
+    while app.maze[row][col] == 1 or (row, col) == (prow, pcol):
         row, col = random.randrange(1,len(app.maze)), random.randrange(1, len(app.maze[0]))
         x0, x1, y0, y1 = app.mazeGen.getCellBounds2(row, col)
         enemy = Enemy(app, ((x0+x1)/2, (y0+y1)/2))
@@ -240,8 +247,7 @@ def checkEnemyCollision(app):
         
         playerPath = app.mazeGen.bfsGetPath((prow, pcol), (app.mazeGen.rows-1, app.mazeGen.cols-1))
         enemy.getPath()
-        
-        if playerPath is None or enemy.path is None:
+        if playerPath is None or enemy.path is None or enemy.path == {}:
             app.enemies.pop(i)
 
 '''
@@ -267,7 +273,11 @@ def drawEntities(app, canvas):
 
         x0 = dx * avgI
         x1 = dx * (avgI + 1)
-        canvas.create_line(x0, y0, x1, y1, fill = 'blue', width = height)
+        if app.getKey:
+            color = 'blue'
+        else:
+            color = 'red'
+        canvas.create_line(x0, y0, x1, y1, fill = color, width = height)
 
     #Key
     if app.key != set():
