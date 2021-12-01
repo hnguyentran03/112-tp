@@ -147,6 +147,11 @@ def keyPressed(app, event):
         app.minimap = not app.minimap
     elif event.key == 'r':
         restartGame(app)
+    elif event.key == '5':
+        app.level = 5
+        app.rows = app.cols = 10
+        app.enemyMove += 50
+        generateMaze(app)
 
     #Moving
     app.player.moveWithKeys(event)
@@ -383,7 +388,7 @@ def drawPath(app, canvas, endRow, endCol):
             nx0, nx1, ny0, ny1 = app.mazeGen.getCellBounds2(nrow*2, ncol*2)
             ncx, ncy = (nx1 + nx0)/2, (ny1 + ny0)/2
 
-            canvas.create_line(cx, cy, ncx, ncy, fill = 'blue', width = 5)
+            canvas.create_line(cx, cy, ncx, ncy, fill = 'blue', width = 1)
 
 def drawMazeClear(app, canvas):
     height = app.height/4
