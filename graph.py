@@ -22,7 +22,7 @@ class Graph():
     
     def getNeighbors(self, node):
         return set(self.table.get(node, {}))
-    
+
     #dfs
     def dfsGetPath(self, nodeA, nodeB):
         path = self.dfsGetPathHelper(nodeA, nodeB, dict())
@@ -30,7 +30,6 @@ class Graph():
 
         if path is None: return path
 
-        #ASK KIAN ABOUT WHY MY DFS HAS THE NONES IN IT
         for node in path:
             if path[node] != None:
                 newPath[node] = path[node]
@@ -54,6 +53,7 @@ class Graph():
                     #If we get nowhere, backtrack
                     visited.pop(nodeA)
             return None
+    
     #bfs
     #Algorithm inspired from https://learn.co/lessons/maze-solver
     #and https://hurna.io/academy/algorithms/maze_pathfinder/bfs.html
@@ -97,6 +97,24 @@ class Maze(Graph):
     '''
     Maze Generation
     '''
+    #Adds edges to make the maze not perfect
+    def randomize(self, paths):
+        for _ in range(paths):
+            row, col = random.randrange(self.rows), random.randrange(self.cols)
+            
+            possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
+            direction = random.choice(possibleWalls)
+            drow, dcol = direction
+            neighbor = nrow, ncol = row+drow, col+dcol
+            
+            isOutOfBounds = nrow < 0 or nrow >= self.rows or ncol < 0 or ncol >= self.cols
+            while neighbor in self.getNeighbors((row, col)) and isOutOfBounds:
+                direction = random.choice(possibleWalls)
+                drow, dcol = direction
+                neighbor = row+drow, col+dcol
+            
+            self.addEdge((row,col), neighbor)
+
     #Idea for Maze Generation from https://en.wikipedia.org/wiki/Maze_generation_algorithm
     #Makes a dfs Maze
     def dfsMaze(self, rows, cols):
@@ -240,7 +258,10 @@ class Maze(Graph):
                 if self.listMaze[row][col] == 1:
                     color = 'black'
                 elif self.listMaze[row][col] == 2:
-                    color = 'blue'
+                    if self.app.getKey:
+                        color = 'blue'
+                    else:
+                        color = 'red'
                 elif self.listMaze[row][col] == 3:
                     color = 'orange'
                 x0, x1, y0, y1 = self.getCellBounds2(row, col)
