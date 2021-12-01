@@ -109,16 +109,18 @@ class Maze(Graph):
             neighbor = row+drow, col+dcol
             
             while neighbor in self.getNeighbors((row, col)) or neighbor not in self.table:
+                #If there are no possible walls, choose new cell
+                if possibleWalls == []:
+                    row, col = random.randrange(self.rows), random.randrange(self.cols)
+                    possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
+                
                 i = random.randrange(len(possibleWalls))
                 direction = possibleWalls.pop(i)
                 drow, dcol = direction
                 neighbor = row+drow, col+dcol
                 
-                #If there are no possible walls, choose new cell
-                if possibleWalls == []:
-                    row, col = random.randrange(self.rows), random.randrange(self.cols)
-                    possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
-                           
+
+
             self.addEdge((row,col), neighbor)
 
     #Idea for Maze Generation from https://en.wikipedia.org/wiki/Maze_generation_algorithm
