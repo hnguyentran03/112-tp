@@ -107,25 +107,6 @@ class Ray():
             self.rayX = horizontalRayX
             self.rayY = horizontalRayY
 
-    #Dot in line segment from https://lucidar.me/en/mathematics/check-if-a-point-belongs-on-a-line-segment/
-    #and  https://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
-    def hitEnemy(self, enemy):
-        x, y = enemy.location
-        cx, cy = self.app.player.location
-        rx, ry = cx+self.rayX, cy+self.rayY
-
-        crossProduct = (y - cy) * (rx - cx) - (x - cx) * (ry - cy)
-        if not almostEqual(crossProduct, 0, 10):
-            return False
-        
-        dotProductEnemy = (x - cx) * (rx - cx) + (y - cy) * (ry - cy)
-        dotProductRay = (rx - cx) * (rx - cx) + (ry - cy) * (ry - cy)
-
-        if dotProductEnemy < 0 or dotProductEnemy > dotProductRay:
-            return False
-        
-        return True
-    
     def hitWall(self, rayX, rayY, direction):
         row = rayY/self.app.cellHeight
         
@@ -152,6 +133,47 @@ class Ray():
         if  outOfBounds or self.app.maze[row][col] == 1: return True
         else: return False
     
+    def hitKey(self):
+        if self.app.getKey:
+            return False
+        krow, kcol = self.app.keyLocation
+        x0, x1, y0, y1 = self.app.mazeGen.getCellBounds2(krow, kcol)
+        x = (x1 + x0)/2
+        y = (y1 + y0)/2
+
+        return self.hitEntity(x, y)
+    
+    def hitGoal(self):
+        grow, gcol = self.app.endLocation
+        x0, x1, y0, y1 = self.app.mazeGen.getCellBounds2(grow, gcol)
+        x = (x1 + x0)/2
+        y = (y1 + y0)/2
+
+        return self.hitEntity(x, y)
+
+    def hitEnemy(self, enemy):
+        x, y = enemy.location
+
+        return self.hitEntity(x, y)
+        
+    #Dot in line segment from https://lucidar.me/en/mathematics/check-if-a-point-belongs-on-a-line-segment/
+    #and  https://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
+    def hitEntity(self, x, y):
+        cx, cy = self.app.player.location
+        rx, ry = cx+self.rayX, cy+self.rayY
+
+        crossProduct = (y - cy) * (rx - cx) - (x - cx) * (ry - cy)
+        if not almostEqual(crossProduct, 0, 10):
+            return False
+        
+        dotProductObject = (x - cx) * (rx - cx) + (y - cy) * (ry - cy)
+        dotProductRay = (rx - cx) * (rx - cx) + (ry - cy) * (ry - cy)
+
+        if dotProductObject < 0 or dotProductObject > dotProductRay:
+            return False
+        
+        return True
+
     def render(self, canvas):
         cx, cy = self.app.player.location
         canvas.create_line(cx, cy, cx+self.rayX, cy+self.rayY, fill = 'yellow')
