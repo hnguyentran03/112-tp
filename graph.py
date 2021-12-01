@@ -21,12 +21,15 @@ class Graph():
         return list(self.table)
     
     def getNeighbors(self, node):
-        return set(self.table[node])
+        return set(self.table.get(node, {}))
     
     #dfs
     def getPath(self, nodeA, nodeB):
         path = self.getPathHelper(nodeA, nodeB, dict())
         newPath = {}
+
+        if path is None: return path
+
         #ASK KIAN ABOUT WHY MY DFS HAS THE NONES IN IT
         for node in path:
             if path[node] != None:
@@ -68,6 +71,9 @@ class Maze(Graph):
         return False
 
 
+    '''
+    Maze Generation
+    '''
     #Idea for Maze Generation from https://en.wikipedia.org/wiki/Maze_generation_algorithm
     #Makes a dfs Maze
     def dfsMaze(self, rows, cols):
@@ -96,7 +102,77 @@ class Maze(Graph):
                         return result
             return None
 
-    #Drawing    
+    #Algorithm from: https://courses.cs.washington.edu/courses/cse326/07su/prj2/kruskal.html
+    #and also https://en.wikipedia.org/wiki/Maze_generation_algorithm
+    def kruskalMaze(self, rows, cols):
+        #Makes a grid of empty cells
+        self.rows = rows
+        self.cols = cols
+        for row in range(rows):
+            for col in range(cols):
+                cell = (row, col)
+                self.table[cell] = {}
+        
+        cells = list(self.table)
+        wallsDown = 0
+
+        #Finally generates maze
+        while wallsDown < (rows)*(cols) - 1:
+            #Picks a random cell
+            cell = random.choice(cells)
+            row, col = cell
+            
+            #Finds a possible random neighbor
+            possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
+            direction = random.choice(possibleWalls)
+            drow, dcol = direction
+            neighbor = row+drow, col+dcol
+            
+            #Neighbor check and legality check
+            if neighbor in self.table and neighbor not in self.getNeighbors(cell):
+                
+                #Mergeing if there isn't a path
+                if self.getPath(cell, neighbor) is None:
+                    self.addEdge(cell, neighbor)
+                    wallsDown += 1
+
+    #Algorithm from: https://courses.cs.washington.edu/courses/cse326/07su/prj2/kruskal.html
+    #and also https://en.wikipedia.org/wiki/Maze_generation_algorithm
+    def primsMaze(self, rows, cols):
+        self.rows = rows
+        self.cols = cols
+        
+        visited = set()
+        cells = set()
+        
+        cell = (random.randrange(rows), random.randrange(cols))
+        cells.add(cell)
+        visited.add(cell)
+        
+        while cells != set():
+            cell = random.choice(list(cells))
+            visited.add(cell)
+            row, col = cell
+            
+            #Checks for all the possible walls that can be moved to
+            possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
+            neighbors = []
+            for drow, dcol in possibleWalls:
+                neighbor = nrow, ncol = row+drow, col+dcol
+                if 0 <= nrow < rows and 0 <= ncol < cols and self.getPath(cell, neighbor) is None:
+                    cells.add(neighbor)
+                    neighbors.append(neighbor)
+            
+            #Chooses a random neighbor to go to
+            if neighbors != []:
+                neighbor = random.choice(neighbors)
+                self.addEdge(cell, neighbor)
+            visited.add(cell)
+            cells.remove(cell)
+            
+    '''
+    DRAWING THE MAZE
+    '''   
     def drawCell(self, canvas, row, col, color = 'white'):
         x0, x1, y0, y1 = self.getCellBounds(row, col)
         canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
