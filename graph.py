@@ -118,13 +118,8 @@ class Maze(Graph):
                 if possibleWalls == []:
                     row, col = random.randrange(self.rows), random.randrange(self.cols)
                     possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
-
-
-
-            
+                           
             self.addEdge((row,col), neighbor)
-            print(self.table)
-            print()
 
     #Idea for Maze Generation from https://en.wikipedia.org/wiki/Maze_generation_algorithm
     #Makes a dfs Maze
