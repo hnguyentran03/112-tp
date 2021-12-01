@@ -39,7 +39,7 @@ class Player():
 
 
 
-    #Angle to turn taken from https://www.youtube.com/watch?v=gYRrGTC7GtA
+    #Angle to turn taken/inspired from https://www.youtube.com/watch?v=gYRrGTC7GtA
     #Moving the player
     def moveWithKeys(self, event):
         #Moving
