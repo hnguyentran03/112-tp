@@ -55,6 +55,8 @@ class Graph():
                     visited.pop(nodeA)
             return None
     #bfs
+    #Algorithm inspired from https://learn.co/lessons/maze-solver
+    #and https://hurna.io/academy/algorithms/maze_pathfinder/bfs.html
     def bfsGetPath(self, nodeA, nodeB):
         #Start with a queue with the node and the path it took to get to the node
         queue = [(nodeA, {})]
@@ -123,7 +125,7 @@ class Maze(Graph):
                         return result
             return None
 
-    #Algorithm from: https://courses.cs.washington.edu/courses/cse326/07su/prj2/kruskal.html
+    #Algorithm inspired from: https://courses.cs.washington.edu/courses/cse326/07su/prj2/kruskal.html
     #and also https://en.wikipedia.org/wiki/Maze_generation_algorithm
     def kruskalMaze(self, rows, cols):
         #Makes a grid of empty cells
@@ -157,7 +159,7 @@ class Maze(Graph):
                     self.addEdge(cell, neighbor)
                     wallsDown += 1
 
-    #Algorithm from: https://courses.cs.washington.edu/courses/cse326/07su/prj2/kruskal.html
+    #Algorithm inspired from: https://courses.cs.washington.edu/courses/cse326/07su/prj2/kruskal.html
     #and also https://en.wikipedia.org/wiki/Maze_generation_algorithm
     def primsMaze(self, rows, cols):
         self.rows = rows
