@@ -326,7 +326,7 @@ def drawEnemies(app, canvas):
         x1 = dx * (avgI + 1)
         canvas.create_line(x0, y0, x1, y1, fill = 'purple', width = height*len(app.enemyRays))
 
-#Drawing walls from https://permadi.com/1996/05/ray-casting-tutorial-9/
+#Drawing walls inspired from https://permadi.com/1996/05/ray-casting-tutorial-9/
 def draw3D(app, canvas):
     wallHeight = 200
     constant = 1/app.mazeGen.rows * 200
@@ -336,7 +336,7 @@ def draw3D(app, canvas):
     for i, ray in enumerate(app.rays):
         distanceToWall = ray.getDistance()
 
-        #Take out fisheye taken from https://www.youtube.com/watch?v=gYRrGTC7GtA
+        #Take out fisheye taken/inspired from https://www.youtube.com/watch?v=gYRrGTC7GtA
         wallAngle = app.player.angle - ray.angle
         if wallAngle < 0: wallAngle += 2*math.pi
         elif wallAngle > 2*math.pi: wallAngle -= 2*math.pi
