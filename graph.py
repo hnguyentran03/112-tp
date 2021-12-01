@@ -24,8 +24,8 @@ class Graph():
         return set(self.table.get(node, {}))
     
     #dfs
-    def getPath(self, nodeA, nodeB):
-        path = self.getPathHelper(nodeA, nodeB, dict())
+    def dfsGetPath(self, nodeA, nodeB):
+        path = self.dfsGetPathHelper(nodeA, nodeB, dict())
         newPath = {}
 
         if path is None: return path
@@ -37,7 +37,7 @@ class Graph():
 
         return newPath
 
-    def getPathHelper(self, nodeA, nodeB, visited):
+    def dfsGetPathHelper(self, nodeA, nodeB, visited):
         if nodeA == nodeB:
             return visited
         else:
@@ -47,13 +47,34 @@ class Graph():
                 if neighbor not in visited:
                     
                     visited[nodeA] = neighbor
-                    result = self.getPathHelper(neighbor, nodeB, visited)
+                    result = self.dfsGetPathHelper(neighbor, nodeB, visited)
                     if result != None:
                         return result
 
                     #If we get nowhere, backtrack
                     visited.pop(nodeA)
             return None
+    #bfs
+    def bfsGetPath(self, nodeA, nodeB):
+        #Start with a queue with the node and the path it took to get to the node
+        queue = [(nodeA, {})]
+        visited = {nodeA}
+        while queue != []:
+            node, path = queue.pop(0)
+            
+            neighbors = self.getNeighbors(node)
+            for neighbor in neighbors:
+                if neighbor not in visited:
+                    #Edits path
+                    newPath = copy.deepcopy(path)
+                    newPath[node] = neighbor
+                    
+                    visited.add(neighbor)
+                    queue.append((neighbor, newPath))
+                    
+                    if neighbor == nodeB:
+                        return newPath
+        return None
 
 
 '''
@@ -132,7 +153,7 @@ class Maze(Graph):
             if neighbor in self.table and neighbor not in self.getNeighbors(cell):
                 
                 #Mergeing if there isn't a path
-                if self.getPath(cell, neighbor) is None:
+                if self.bfsGetPath(cell, neighbor) is None:
                     self.addEdge(cell, neighbor)
                     wallsDown += 1
 
@@ -159,7 +180,7 @@ class Maze(Graph):
             neighbors = []
             for drow, dcol in possibleWalls:
                 neighbor = nrow, ncol = row+drow, col+dcol
-                if 0 <= nrow < rows and 0 <= ncol < cols and self.getPath(cell, neighbor) is None:
+                if 0 <= nrow < rows and 0 <= ncol < cols and self.bfsGetPath(cell, neighbor) is None:
                     cells.add(neighbor)
                     neighbors.append(neighbor)
             
