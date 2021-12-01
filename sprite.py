@@ -1,4 +1,5 @@
 import math
+import random
 
 #HELPERS
 def almostEqual(d1, d2):
@@ -15,6 +16,7 @@ class Enemy():
     def __init__(self, app, location):
         self.app = app
         self.location = location
+        self.pathFinding = random.choice(['bfs', 'dfs'])
     
         #Gets the current cell the player is in
     def checkLocation(self, cx, cy):
@@ -52,8 +54,11 @@ class Enemy():
 
         prow, pcol = normalize(prow, pcol) 
         crow, ccol = normalize(crow, ccol)
-
-        path = self.app.mazeGen.getPath((crow, ccol), (prow, pcol))
+        
+        if self.pathFinding == 'dfs':
+            path = self.app.mazeGen.dfsGetPath((crow, ccol), (prow, pcol))
+        elif self.pathFinding == 'bfs':
+            path = self.app.mazeGen.bfsGetPath((crow, ccol), (prow, pcol))
         self.path = path
 
     def drawEnemy(self, canvas):
