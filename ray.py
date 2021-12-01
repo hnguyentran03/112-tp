@@ -1,4 +1,4 @@
-#Initialization of rays taken from  https://www.youtube.com/watch?v=gYRrGTC7GtA
+#Initialization of rays inspiration from  https://www.youtube.com/watch?v=gYRrGTC7GtA
 #Calculations and inspiration for rays taken from https://permadi.com/1996/05/ray-casting-tutorial-7/
 #raycasting test
 
@@ -156,7 +156,7 @@ class Ray():
 
         return self.hitEntity(x, y)
         
-    #Dot in line segment from https://lucidar.me/en/mathematics/check-if-a-point-belongs-on-a-line-segment/
+    #Dot in line segment inspired from https://lucidar.me/en/mathematics/check-if-a-point-belongs-on-a-line-segment/
     #and  https://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
     def hitEntity(self, x, y):
         cx, cy = self.app.player.location
