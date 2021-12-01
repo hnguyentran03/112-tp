@@ -4,3 +4,5 @@ My tp is going to be called 112maze and it is going to be a maze game that uses 
 To run the project, run the visuals.py file. No libraries or additional files need to be downloaded other than the ones in this repository.
 
 The controls are w,a,s,d to move up, left, down, right respectively. To turn your camera left and right, use the left and right arrow keys. To find the path to the next maze objective (a key or a goal), click p. To toggle the minimap, click m. To restart, click r.
+
+To skip to level 5, click 5.
