@@ -103,14 +103,24 @@ class Maze(Graph):
             row, col = random.randrange(self.rows), random.randrange(self.cols)
             
             possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
-            direction = random.choice(possibleWalls)
+            i = random.randrange(len(possibleWalls))
+            direction = possibleWalls.pop(i)
             drow, dcol = direction
-            neighbor = nrow, ncol = row+drow, col+dcol
+            neighbor = row+drow, col+dcol
             
             while neighbor in self.getNeighbors((row, col)) or neighbor not in self.table:
-                direction = random.choice(possibleWalls)
+                i = random.randrange(len(possibleWalls))
+                direction = possibleWalls.pop(i)
                 drow, dcol = direction
                 neighbor = row+drow, col+dcol
+                
+                #If there are no possible walls, choose new cell
+                if possibleWalls == []:
+                    row, col = random.randrange(self.rows), random.randrange(self.cols)
+                    possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
+
+
+
             
             self.addEdge((row,col), neighbor)
             print(self.table)
