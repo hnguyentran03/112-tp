@@ -1,6 +1,6 @@
 from cmu_112_graphics import *
 from helpers import drawBackground
-# TODO from game import game_appStarted
+from game import game_appStarted
 from button import Button
 
 # EFFECTS FOR BUTTONS AND MENUS
@@ -8,7 +8,7 @@ from button import Button
 
 def startButton(app):
     app.mode = 'game'
-    # game_appStarted(app)
+    game_appStarted(app)
 
 
 # def scoreButton(app):
