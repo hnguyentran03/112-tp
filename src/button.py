@@ -1,4 +1,4 @@
-from helper import round_rectangle
+from helpers import round_rectangle
 from cmu_112_graphics import *
 
 

@@ -1,7 +1,7 @@
 from cmu_112_graphics import *
-from helper import drawBackground
+from helpers import drawBackground
 # TODO from game import game_appStarted
-from button import Button, Menu
+from button import Button
 
 # EFFECTS FOR BUTTONS AND MENUS
 
@@ -22,21 +22,21 @@ def startButton(app):
 #     app.scoreMenu.getData('Scores', formattedScores)
 
 
-def scoreMenuEffect(app):
-    app.scoreMenu.hide()
+# def scoreMenuEffect(app):
+#     app.scoreMenu.hide()
 
 
-def controlButton(app):
-    formattedControls = ''
-    for name, conList in app.controls.items():
+# def controlButton(app):
+#     formattedControls = ''
+#     for name, conList in app.controls.items():
 
-        formattedControls += f'{name}: {conList}\n'
-    app.controlMenu.show()
-    app.controlMenu.getData('Controls', formattedControls)
+#         formattedControls += f'{name}: {conList}\n'
+#     app.controlMenu.show()
+#     app.controlMenu.getData('Controls', formattedControls)
 
 
-def controlMenuEffect(app):
-    app.controlMenu.hide()
+# def controlMenuEffect(app):
+#     app.controlMenu.hide()
 
 # INITIALIZE SPLASHSCREEN
 
@@ -76,7 +76,7 @@ def splash_mousePressed(app, event):
 
 def drawTitle(app, canvas):
     canvas.create_text(app.width//2, app.height//10, text='112maze',
-                       font=f'Helvetica {int(app.height//10)} bold')
+                       font=f'Helvetica {int(app.height//10)} bold', fill=app.textColors[app.colorIndex])
 
 
 def splash_redrawAll(app, canvas):
