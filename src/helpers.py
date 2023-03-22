@@ -33,6 +33,13 @@ def repr2dList(L):
     output.append(']')
     return ''.join(output)
 
+def roundHalfUp(d):
+    # Round to nearest with ties going away from zero.
+    # You do not need to understand how this function works.
+    import decimal
+    rounding = decimal.ROUND_HALF_UP
+    return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
+
 
 # DRAW
 
