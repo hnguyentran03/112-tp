@@ -1,104 +1,88 @@
 import math
 
-#HELPER
-def almostEqual(d1, d2):
-    epsilon = 10**-10
-    return (abs(d2 - d1) < epsilon)
-
-class Player():
-    def __init__(self, app):
-        #This seems weird
-        self.app = app
-        x0, x1, y0, y1 = app.mazeGen.getCellBounds2(0, 0)
-        cx, cy = (x1 + x0) / 2, (y1 + y0) / 2
-        self.location = (cx, cy)
-        self.angle = math.pi/2
-        self.step = (app.cellHeight/5)
-        self.move = (self.step * math.cos(self.angle), self.step * math.sin(self.angle))
-
-
-    #Gets the current cell the player is in
-    def checkLocation(self, cx, cy):
-        row = cy/self.app.cellHeight
-        #Calculates the row and col (because of precision errors)
-        if almostEqual(row, math.ceil(row)): row = math.ceil(row)
-        else: row = math.floor(row)
-
-        col = cx/self.app.cellWidth
-        if almostEqual(col, math.ceil(col)): col = math.ceil(col)
-        else: col = math.floor(col)
-
-        return row, col
+class Player:
+    def __init__(self, startX, startY, controls, step=5, angle=0, width=0, size=5, color='red'):
+        self.cx = startX
+        self.cy = startY
+        self.angle = angle
+        self.step = step
+        self.dx, self.dy = (self.step * math.cos(self.angle), self.step*math.sin(self.angle))
+        self.mousePos = width/2
+        self.controls = controls
+        self.size = size
+        self.color = color
     
-    def isIllegalPosition(self, cx, cy):
-        row, col = self.checkLocation(cx, cy)
+    def getRow(self, maze):
+        return math.floor(self.cy / maze.getCellHeight())
+    
+    def getCol(self, maze):
+        return math.floor(self.cx / maze.getCellWidth())
 
-        outOfBounds = not(0 <= row < len(self.app.maze)) or not(0 <= col < len(self.app.maze))
-        if  outOfBounds or self.app.maze[row][col] == 1: return True
-        else: return False
+    def isIllegalPosition(self, maze):
+        row, col = self.getRow(maze), self.getCol(maze)
+        return maze.checkPos(row, col)
+    
+    def keyPressed(self, event, maze):
+        # Movement
+        if event.key in self.controls['Up']:
+            self.movePlayer(1, 'Up', maze)
+        elif event.key in self.controls['Down']:
+            self.movePlayer(-1, 'Down', maze)
+        elif event.key in self.controls['Left']:
+            self.movePlayer(-1, 'Left', maze)
+        elif event.key in self.controls['Right']:
+            self.movePlayer(1, 'Right', maze)
 
-
-
-    #Angle to turn taken/inspired from https://www.youtube.com/watch?v=gYRrGTC7GtA
-    #Moving the player
-    def moveWithKeys(self, event):
-        #Moving
-        if event.key == 'w':
-            self.movePlayer(1, 'Up')
-        elif event.key == 's':
-            self.movePlayer(-1, 'Down')
-        elif event.key == 'a':
-            self.movePlayer(-1, 'Left')
-        elif event.key == 'd':
-            self.movePlayer(1, 'Right')
-        
-        #Turning
-        if event.key == 'Left':
-            self.angle -= math.pi/(3*(2**3))
+        # Turning
+        if event.key in self.controls['Turn Left']:
+            self.angle -= math.pi/self.controls['Turn Speed']
             
-            #Accounts for overangling
+            # Accounts for overangling
             if self.angle < 0: self.angle += 2*math.pi
             
-            #Calculations from angle to movement
-            dx, dy = self.move
-            dx = math.cos(self.angle)
-            dy = math.sin(self.angle)
-            self.move = (self.step*dx, self.step*dy)
-    
-        elif event.key == 'Right':
-            self.angle += math.pi/ (3*(2**3))
+            # Calculations from angle to movement
+            self.dx = self.step * math.cos(self.angle)
+            self.dy = self.step * math.sin(self.angle)
+        
+        elif event.key in self.controls['Turn Right']:
+            self.angle += math.pi/self.controls['Turn Speed']
             
-            #Accounts for overangling
+            # Accounts for overangling
             if self.angle > 2*math.pi:
                 self.angle -= 2*math.pi
             
-            #Calculations from angle to movement
-            dx, dy = self.move
-            dx = math.cos(self.angle)
-            dy = math.sin(self.angle)
-            self.move = (self.step*dx, self.step*dy)
+            # Calculations from angle to movement
+            self.dx = self.step * math.cos(self.angle)
+            self.dy = self.step * math.sin(self.angle)
 
-    def movePlayer(self, direction, directionName):
-        cx, cy = self.location
-        dx, dy = self.move
-        
+    def mouseMoved(self , event):
+        #TODO put in controls
+        difference = event.x - self.mousePos
+        self.angle += math.pi*difference/self.controls['Sensitivity']
+    
+    def movePlayer(self, direction, directionName, maze):
+        cx, cy = self.cx, self.cy
         if directionName == 'Up' or directionName == 'Down':
-            cx += dx * direction
-            cy += dy * direction
+            self.cx += self.dx * direction
+            self.cy += self.dy * direction
         
-        #FIX
+        # TODO FIX
         elif directionName == 'Left' or directionName == 'Right':
-            cx += (dy * direction * -1)/2
-            cy += (dx * direction)/2
+            self.cx += (self.dy * direction * -1)/2
+            self.cy += (self.dx * direction)/2
         
-        if not self.isIllegalPosition(cx, cy):
-            self.location = (cx, cy)
-
-    #Drawing the player
-    def drawPlayer(self, canvas):
-        cx, cy = self.location
-        r = self.app.cellHeight/5
-        canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill = 'red', outline = 'red')
+        if not self.isIllegalPosition(maze):
+            self.cx = cx
+            self.cy = cy
     
     def render(self, canvas):
-        self.drawPlayer(canvas)
+        r = self.size
+        canvas.create_oval(self.cx-r, self.cy-r, self.cx+r, self.cy+r, fill = self.color)
+
+
+
+    
+
+
+
+        

@@ -61,6 +61,6 @@ def game_redrawAll(app, canvas):
     app.maze.render3D(app, canvas)
 
     if app.showMinimap:
-        app.maze.renderMinimap(app, canvas)
+        app.maze.renderMinimap(canvas)
 
 

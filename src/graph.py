@@ -254,7 +254,6 @@ class Maze(Graph):
                 nrow, ncol = neighbor
                 drow, dcol = nrow - row, ncol - col
                 maze[row*2+drow][col*2+dcol] = 0
-        self.listMaze = maze
         return maze
 
     def drawListMaze(self, canvas):
