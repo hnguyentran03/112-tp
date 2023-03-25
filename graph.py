@@ -1,6 +1,40 @@
 import random
 # from cmu_112_graphics import *
 
+class Node:
+    nodeTypes = ['wall', 'cell', 'key', 'goal']
+    def __init__(self, row, col, t, color):
+        self.row = row
+        self.col = col
+        self.t = t
+        self.color = color
+        
+    def __repr__(self):
+        return f"Node({self.row}, {self.col}, {self.t}, {self.color})"
+    
+    def getPos(self):
+        return (self.row, self.col)
+    
+    def getType(self):
+        return self.t
+    
+    def getColor(self):
+        return self.color
+
+class Wall(Node):
+    def __init__(self, row, col, color):
+        super().__init__(row, col, 'wall', color)
+    
+    def __repr__(self):
+        return f"Wall({self.row}, {self.col}, {self.color})"
+
+class Cell(Node):
+    def __init__(self, row, col, color):
+        super().__init__(row, col, 'cell', color)
+    
+    def __repr__(self):
+        return f"Cell({self.row}, {self.col}, {self.color})"
+
 #Idea for graph class (and some funcitons) from Graph Algorithm Mini-Lecture
 class Graph:
     def __init__(self, wallColor='white', cellColor='white'):
@@ -9,7 +43,6 @@ class Graph:
         self.wallColor = wallColor
 
 
-    
     def __repr__(self):
         return f'{self.table}'
     
@@ -29,11 +62,12 @@ class Graph:
     
     def convertTo2DList(self):
         #All walls
-        maze = [['wall']*(self.cols*2-1) for _ in range(self.rows*2-1)]
+        maze = [[Wall(row, col, self.wallColor) for col in range(self.cols*2-1)] for row in range(self.rows*2-1)]
         
         #Puts all cells into the maze
-        for row, col in self.table:
-            maze[row*2][col*2] = 'cell'
+        for node in self.table:
+            row, col = node.getPos()
+            maze[row*2][col*2] = Cell(row, col, self.cellColor)
 
         #Makes paths between cells
         for row, col in self.table:
@@ -41,21 +75,16 @@ class Graph:
             for neighbor in neighbors:
                 nrow, ncol = neighbor
                 drow, dcol = nrow - row, ncol - col
-                maze[row*2+drow][col*2+dcol] = 'cell'
+                maze[row*2+drow][col*2+dcol] = Cell(row, col, self.cellColor)
         self.L = maze
 
     def render(self, canvas):
         for row in range(len(self.L)):
             for col in range(len(self.L[0])):
-                if self.L[row][col] == 'wall':
-                    canvas.create_rectangle(col*self.cellSize, row*self.cellSize, 
+                node = self.L[row][col]
+                canvas.create_rectangle(col*self.cellSize, row*self.cellSize, 
                                             (col+1)*self.cellSize, (row+1)*self.cellSize, 
-                                            fill=self.wallColor)
-                elif self.L[row][col] == 'cell':
-                    canvas.create_rectangle(col*self.cellSize, row*self.cellSize, 
-                                            (col+1)*self.cellSize, (row+1)*self.cellSize, 
-                                            fill=self.cellColor)
-
+                                            fill=node.getColor())
 
 
 class Maze(Graph):
@@ -73,7 +102,28 @@ class Maze(Graph):
         self.rows = rows
         self.cols = cols
         self.mazeType = mazeType
+
+    def generate(self):
+        #Generates a maze
+        if self.mazeType == 'dfs':
+            self.generateIterDFS()
+        elif self.mazeType == 'prim':
+            self.generatePrim()
+        elif self.mazeType == 'kruskal':
+            self.generateKruskal()
+        self.convertTo2DList()
+        self.addGoals()
+        self.addKey()
     
+    def generateIterDFS(self):
+        pass
+
+    def generatePrim(self):
+        pass
+
+    def generateKruskal(self):
+        pass
+
     def checkPos(self, row, col):
         return 0 <= row < self.rows and 0 <= col < self.cols and self.L[row][col] != 'wall'
 
@@ -85,19 +135,7 @@ class Maze(Graph):
         #Draws the minimap
         for row in range(len(self.L)):
             for col in range(len(self.L[0])):
-                if self.L[row][col] == 'wall':
-                    canvas.create_rectangle(col*self.cellSize, row*self.cellSize, 
+                node = self.L[row][col]
+                canvas.create_rectangle(col*self.cellSize, row*self.cellSize, 
                                             (col+1)*self.cellSize, (row+1)*self.cellSize, 
-                                            fill=self.wallColor)
-                elif self.L[row][col] == 'cell':
-                    canvas.create_rectangle(col*self.cellSize, row*self.cellSize, 
-                                            (col+1)*self.cellSize, (row+1)*self.cellSize, 
-                                            fill=self.cellColor)
-                elif self.L[row][col] == 'key':
-                    canvas.create_rectangle(col*self.cellSize, row*self.cellSize, 
-                                            (col+1)*self.cellSize, (row+1)*self.cellSize, 
-                                            fill=self.cellColor)
-                elif self.L[row][col] == 'goal':
-                    canvas.create_rectangle(col*self.cellSize, row*self.cellSize, 
-                                            (col+1)*self.cellSize, (row+1)*self.cellSize, 
-                                            fill=self.goalColors[1] if gotKey else self.goalColors[0])
+                                            fill=node.getColor())
