@@ -1,278 +1,215 @@
 import random
-from cmu_112_graphics import *
+# from cmu_112_graphics import *
 
-#Idea for graph class (and some funcitons) from Graph Algorithm Mini-Lecture
-class Graph():
-    def __init__(self):
-        self.table = {}
-    
+
+class Vertex:
+    vertexTypes = ['wall', 'cell', 'key', 'goal']
+
+    def __init__(self, row, col, t, color):
+        self.row = row
+        self.col = col
+        self.t = t
+        self.color = color
+
+    def __repr__(self):
+        return f"Vertex({self.row}, {self.col}, {self.t}, {self.color})"
+
+    def getPos(self):
+        return (self.row, self.col)
+
+    def getType(self):
+        return self.t
+
+    def getColor(self):
+        return self.color
+
+
+class Wall(Vertex):
+    def __init__(self, row, col, color):
+        super().__init__(row, col, 'wall', color)
+
+    def __repr__(self): return "1"
+    # return f"Wall({self.row}, {self.col}, {self.color})"
+
+
+class Cell(Vertex):
+    def __init__(self, row, col, color):
+        super().__init__(row, col, 'cell', color)
+
+    def __repr__(self): return "0"
+    # return f"Cell({self.row}, {self.col}, {self.color})"
+
+# Idea for graph class (and some funcitons) from Graph Algorithm Mini-Lecture
+
+
+class Graph:
+    def __init__(self, wallColor='white', cellColor='white'):
+        self.table = {}  # Adjacency table
+        self.cellColor = cellColor
+        self.wallColor = wallColor
+
     def __repr__(self):
         return f'{self.table}'
-    
-    def addEdge(self, nodeA, nodeB, weight=1):
-        if nodeA not in self.table:
-            self.table[nodeA] = {}
-        if nodeB not in self.table:
-            self.table[nodeB] = {}
-        self.table[nodeA][nodeB] = weight
-        self.table[nodeB][nodeA] = weight
-    
-    def getNodes(self):
+
+    # Adds a directed edge between vertexA and vertexB
+    def addEdge(self, vertexA, vertexB, weight=1):
+        if vertexA not in self.table:
+            self.table[vertexA] = {}
+        if vertexB not in self.table:
+            self.table[vertexB] = {}
+        self.table[vertexA][vertexB] = weight
+        # self.table[vertexB][vertexA] = weight
+
+    def getVertexs(self):
         return list(self.table)
-    
-    def getNeighbors(self, node):
-        return set(self.table.get(node, {}))
 
-    #dfs
-    def dfsGetPath(self, nodeA, nodeB):
-        path = self.dfsGetPathHelper(nodeA, nodeB, dict())
-        newPath = {}
-
-        if path is None: return path
-
-        for node in path:
-            if path[node] != None:
-                newPath[node] = path[node]
-
-        return newPath
-
-    def dfsGetPathHelper(self, nodeA, nodeB, visited):
-        if nodeA == nodeB:
-            return visited
-        else:
-            visited[nodeA] = None
-            #Search neighbors
-            for neighbor in self.getNeighbors(nodeA):
-                if neighbor not in visited:
-                    
-                    visited[nodeA] = neighbor
-                    result = self.dfsGetPathHelper(neighbor, nodeB, visited)
-                    if result != None:
-                        return result
-
-                    #If we get nowhere, backtrack
-                    visited.pop(nodeA)
-            return None
-    
-    #bfs
-    #Algorithm inspired from https://learn.co/lessons/maze-solver
-    #and https://hurna.io/academy/algorithms/maze_pathfinder/bfs.html
-    def bfsGetPath(self, nodeA, nodeB):
-        #Start with a queue with the node and the path it took to get to the node
-        queue = [(nodeA, {})]
-        visited = {nodeA}
-        while queue != []:
-            node, path = queue.pop(0)
-            
-            neighbors = self.getNeighbors(node)
-            for neighbor in neighbors:
-                if neighbor not in visited:
-                    #Edits path
-                    newPath = copy.deepcopy(path)
-                    newPath[node] = neighbor
-                    
-                    visited.add(neighbor)
-                    queue.append((neighbor, newPath))
-                    
-                    if neighbor == nodeB:
-                        return newPath
-        return None
-
-
-'''
-FROM GRAPH TO MAZE
-'''
-class Maze(Graph):
-    def __init__(self, app):
-        super().__init__()
-        self.app = app
-    #Checks if the move is legal or not
-    def isLegalMove(self, row, col, visited):
-        if 0 <= row < self.rows and 0 <= col < self.cols:
-            if (row, col) not in visited:
-                return True
-        return False
-
-
-    '''
-    Maze Generation
-    '''
-    #Adds edges to make the maze not perfect
-    def randomize(self, paths):
-        for _ in range(paths):
-            row, col = random.randrange(self.rows), random.randrange(self.cols)
-            
-            possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
-            i = random.randrange(len(possibleWalls))
-            direction = possibleWalls.pop(i)
-            drow, dcol = direction
-            neighbor = row+drow, col+dcol
-            
-            while neighbor in self.getNeighbors((row, col)) or neighbor not in self.table:
-                #If there are no possible walls, choose new cell
-                if possibleWalls == []:
-                    row, col = random.randrange(self.rows), random.randrange(self.cols)
-                    possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
-                
-                i = random.randrange(len(possibleWalls))
-                direction = possibleWalls.pop(i)
-                drow, dcol = direction
-                neighbor = row+drow, col+dcol
-                
-
-
-            self.addEdge((row,col), neighbor)
-
-    #Idea for Maze Generation from https://en.wikipedia.org/wiki/Maze_generation_algorithm
-    #Makes a dfs Maze
-    def dfsMaze(self, rows, cols):
-        self.rows = rows
-        self.cols = cols
-        return self.dfsMazeHelper(0, 0, visited=set())
-
-    def dfsMazeHelper(self, row, col, visited):
-        if len(visited) == self.rows*self.cols:
-            return self
-        else:
-            #Randomized moves
-            visited.add((row, col))
-            moves = [(0,1), (0,-1), (1, 0), (-1, 0)]
-            random.shuffle(moves)
-            for move in moves:
-                drow, dcol = move
-                #Inherent backtracking because doesn't change row or col
-                newRow = row + drow
-                newCol = col + dcol
-                if self.isLegalMove(newRow, newCol, visited):
-                    #Makes a path between the two
-                    self.addEdge((row, col), (newRow, newCol))
-                    result = self.dfsMazeHelper(newRow, newCol, visited)
-                    if result != None:
-                        return result
-            return None
-
-    #Algorithm inspired from: https://courses.cs.washington.edu/courses/cse326/07su/prj2/kruskal.html
-    #and also https://en.wikipedia.org/wiki/Maze_generation_algorithm
-    def kruskalMaze(self, rows, cols):
-        #Makes a grid of empty cells
-        self.rows = rows
-        self.cols = cols
-        for row in range(rows):
-            for col in range(cols):
-                cell = (row, col)
-                self.table[cell] = {}
-        
-        cells = list(self.table)
-        wallsDown = 0
-
-        #Finally generates maze
-        while wallsDown < (rows)*(cols) - 1:
-            #Picks a random cell
-            cell = random.choice(cells)
-            row, col = cell
-            
-            #Finds a possible random neighbor
-            possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
-            direction = random.choice(possibleWalls)
-            drow, dcol = direction
-            neighbor = row+drow, col+dcol
-            
-            #Neighbor check and legality check
-            if neighbor in self.table and neighbor not in self.getNeighbors(cell):
-                
-                #Mergeing if there isn't a path
-                if self.bfsGetPath(cell, neighbor) is None:
-                    self.addEdge(cell, neighbor)
-                    wallsDown += 1
-
-    #Algorithm inspired from: https://courses.cs.washington.edu/courses/cse326/07su/prj2/kruskal.html
-    #and also https://en.wikipedia.org/wiki/Maze_generation_algorithm
-    def primsMaze(self, rows, cols):
-        self.rows = rows
-        self.cols = cols
-        
-        visited = set()
-        cells = set()
-        
-        cell = (random.randrange(rows), random.randrange(cols))
-        cells.add(cell)
-        visited.add(cell)
-        
-        while cells != set():
-            cell = random.choice(list(cells))
-            visited.add(cell)
-            row, col = cell
-            
-            #Checks for all the possible walls that can be moved to
-            possibleWalls = [(0,1), (0,-1), (1, 0), (-1, 0)]
-            neighbors = []
-            for drow, dcol in possibleWalls:
-                neighbor = nrow, ncol = row+drow, col+dcol
-                if 0 <= nrow < rows and 0 <= ncol < cols and self.bfsGetPath(cell, neighbor) is None:
-                    cells.add(neighbor)
-                    neighbors.append(neighbor)
-            
-            #Chooses a random neighbor to go to
-            if neighbors != []:
-                neighbor = random.choice(neighbors)
-                self.addEdge(cell, neighbor)
-            visited.add(cell)
-            cells.remove(cell)
-            
-    '''
-    DRAWING THE MAZE
-    '''   
-    def drawCell(self, canvas, row, col, color = 'white'):
-        x0, x1, y0, y1 = self.getCellBounds(row, col)
-        canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
-    
-    def getCellBounds2(self, row, col):
-        #Taken from 112 Notes/Lecture (also what do we do about the app.table)
-        gridWidth  = self.app.width/4
-        gridHeight = self.app.height/4
-        cellWidth = gridWidth / len(self.listMaze)
-        cellHeight = gridHeight / len(self.listMaze[0])
-        x0 = col * cellWidth
-        x1 = (col+1) * cellWidth
-        y0 = row * cellHeight
-        y1 = (row+1) * cellHeight
-        return x0, x1, y0, y1
+    def getNeighbors(self, vertex):
+        return set(self.table.get(vertex, {}))
 
     def convertTo2DList(self):
-        #All walls
-        maze = [[1]*(self.cols*2-1) for _ in range(self.rows*2-1)]
-        
-        #Puts all cells into the maze
-        for row, col in self.table:
-            maze[row*2][col*2] = 0
+        # All walls
+        maze = [[Wall(row, col, self.wallColor) for col in range(
+            self.cols*2-1)] for row in range(self.rows*2-1)]
 
-        #Makes paths between cells
-        for cell in self.table:
-            row, col = cell
-            neighbors = self.getNeighbors(cell)
+        # Puts all cells into the maze
+        for row, col in self.table:
+            maze[row*2][col*2] = Cell(row, col, self.cellColor)
+
+        # Makes paths between cells
+        for row, col in self.table:
+            neighbors = self.getNeighbors((row, col))
             for neighbor in neighbors:
                 nrow, ncol = neighbor
                 drow, dcol = nrow - row, ncol - col
-                maze[row*2+drow][col*2+dcol] = 0
-        return maze
-
-    def drawListMaze(self, canvas):
-        numRows = len(self.listMaze)
-        numCols = len(self.listMaze[0])
-        for row in range(numRows):
-            for col in range(numCols):
-                color = 'white'
-                if self.listMaze[row][col] == 1:
-                    color = 'black'
-                elif self.listMaze[row][col] == 2:
-                    if self.app.getKey:
-                        color = 'blue'
-                    else:
-                        color = 'red'
-                elif self.listMaze[row][col] == 3:
-                    color = 'orange'
-                x0, x1, y0, y1 = self.getCellBounds2(row, col)
-                canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = '')
+                maze[row*2+drow][col*2+dcol] = Cell(row, col, self.cellColor)
+        self.L = maze
 
     def render(self, canvas):
-        self.drawListMaze(canvas)
+        for row in range(len(self.L)):
+            for col in range(len(self.L[0])):
+                vertex = self.L[row][col]
+                canvas.create_rectangle(col*self.cellSize, row*self.cellSize,
+                                        (col+1)*self.cellSize, (row+1) *
+                                        self.cellSize,
+                                        fill=vertex.getColor())
+
+
+class Maze(Graph):
+    mazeTypes = ['dfs', 'prim', 'kruskal']
+
+    @staticmethod
+    def getTypes():
+        return Maze.mazeTypes
+
+    def __init__(self, rows, cols, mazeType, wallColor='white', goalColors=None, keyColor='orange', cellColor='white'):
+        super().__init__(wallColor, cellColor)
+        self.goalColors = goalColors if goalColors else ['blue', 'red']
+        self.keyColor = keyColor
+
+        self.rows = rows
+        self.cols = cols
+        self.mazeType = mazeType
+
+    def generate(self):
+        # Generates a maze
+        if self.mazeType == 'dfs':
+            self.generateIterDFS()
+        elif self.mazeType == 'prim':
+            self.generatePrim()
+        # elif self.mazeType == 'kruskal':
+        #     self.generateKruskal()
+        self.convertTo2DList()
+        # self.addGoals()
+        # self.addKey()
+
+    # Taken from https://en.wikipedia.org/wiki/Maze_generation_algorithm
+    def generateIterDFS(self):
+        visited = set()
+        frontier = []  # Stack
+        start = (random.randrange(0, self.rows),
+                 random.randrange(0, self.cols))
+
+        frontier.append(start)
+
+        # While there are still cells to explore
+        while frontier:
+            vertex = row, col = frontier.pop()
+            visited.add(vertex)
+            
+            # Find all unvisited neighbors
+            neighbors = []
+            for drow, dcol in [(0, 1), (0, -1), (1, 0), (-1, 0)]:  # Right, Left, Down, Up
+                neighbor = nrow, ncol = (row + drow, col + dcol)
+                if 0 <= nrow < self.rows and 0 <= ncol < self.cols and neighbor not in visited:
+                    neighbors.append(neighbor)
+
+            # If there are neighbors, choose one to add to maze
+            # Otherwise, do nothing
+            if neighbors:
+                frontier.append(vertex)
+                nextVertex = random.choice(neighbors)
+                self.addEdge(vertex, nextVertex)
+                self.addEdge(nextVertex, vertex)
+                frontier.append(nextVertex)
+
+    # Taken from https://en.wikipedia.org/wiki/Prim%27s_algorithm
+    def generatePrim(self):
+        visited = set()
+        frontier = []
+        start = (random.randrange(0, self.rows),
+                 random.randrange(0, self.cols))
+
+        frontier.append(start)
+        
+        # While there are still walls
+        while frontier:
+            vertex = row, col = random.choice(frontier)
+            frontier.remove(vertex)
+            visited.add(vertex)
+
+            # Find all neighboring walls
+            neighbors = []
+            for drow, dcol in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                neighbor = nrow, ncol = (row + drow, col + dcol)
+                if 0 <= nrow < self.rows and 0 <= ncol < self.cols and neighbor not in visited:
+                    frontier.append(neighbor)
+                    neighbors.append(neighbor)
+
+            # If there are walls, break one of them down
+            # Otherwise, do nothing
+            if neighbors:
+                nextVertex = random.choice(neighbors)
+                self.addEdge(vertex, nextVertex)
+                self.addEdge(nextVertex, vertex)
+
+            
+
+    def generateKruskal(self):
+        pass
+
+    def checkPos(self, row, col):
+        return 0 <= row < self.rows and 0 <= col < self.cols and self.L[row][col] != 'wall'
+
+    def render3D(self, canvas):
+        pass
+
+    # TODO make getKey to modify maze
+    def renderMinimap(self, canvas):
+        # Draws the minimap
+        for row in range(len(self.L)):
+            for col in range(len(self.L[0])):
+                vertex = self.L[row][col]
+                canvas.create_rectangle(col*self.cellSize, row*self.cellSize,
+                                        (col+1)*self.cellSize, (row+1) *
+                                        self.cellSize,
+                                        fill=vertex.getColor())
+
+
+# def testMaze():
+#     print('Testing Maze Class...')
+#     m = Maze(5, 5, 'prim')
+#     m.generate()
+#     print('Passed!')
+
+
+# testMaze()
