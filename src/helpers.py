@@ -33,6 +33,9 @@ def repr2dList(L):
     output.append(']')
     return ''.join(output)
 
+def print2dList(L):
+    print(repr2dList(L))
+
 def roundHalfUp(d):
     # Round to nearest with ties going away from zero.
     # You do not need to understand how this function works.

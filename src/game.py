@@ -17,7 +17,7 @@ def game_appStarted(app):
    
     app.timerDelay = 10
 
-    app.player = Player()
+    # app.player = Player()
 
 
 def restartGame(app):

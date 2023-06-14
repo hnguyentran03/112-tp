@@ -1,5 +1,6 @@
 import random
-# from cmu_112_graphics import *
+from cmu_112_graphics import *
+from helpers import print2dList
 
 
 class Vertex:
@@ -91,7 +92,7 @@ class Graph:
                 canvas.create_rectangle(col*self.cellSize, row*self.cellSize,
                                         (col+1)*self.cellSize, (row+1) *
                                         self.cellSize,
-                                        fill=vertex.getColor())
+                                        fill=vertex.getColor(), outline=vertex.getColor())
 
 
 class Maze(Graph):
@@ -101,7 +102,7 @@ class Maze(Graph):
     def getTypes():
         return Maze.mazeTypes
 
-    def __init__(self, rows, cols, mazeType, wallColor='white', goalColors=None, keyColor='orange', cellColor='white'):
+    def __init__(self, rows, cols, mazeType, cellSize, wallColor='black', goalColors=None, keyColor='orange', cellColor='white'):
         super().__init__(wallColor, cellColor)
         self.goalColors = goalColors if goalColors else ['blue', 'red']
         self.keyColor = keyColor
@@ -109,6 +110,7 @@ class Maze(Graph):
         self.rows = rows
         self.cols = cols
         self.mazeType = mazeType
+        self.cellSize = cellSize
 
     def generate(self):
         # Generates a maze
@@ -135,7 +137,7 @@ class Maze(Graph):
         while frontier:
             vertex = row, col = frontier.pop()
             visited.add(vertex)
-            
+
             # Find all unvisited neighbors
             neighbors = []
             for drow, dcol in [(0, 1), (0, -1), (1, 0), (-1, 0)]:  # Right, Left, Down, Up
@@ -160,7 +162,7 @@ class Maze(Graph):
                  random.randrange(0, self.cols))
 
         frontier.append(start)
-        
+
         # While there are still walls
         while frontier:
             vertex = row, col = random.choice(frontier)
@@ -182,8 +184,6 @@ class Maze(Graph):
                 self.addEdge(vertex, nextVertex)
                 self.addEdge(nextVertex, vertex)
 
-            
-
     def generateKruskal(self):
         pass
 
@@ -202,14 +202,28 @@ class Maze(Graph):
                 canvas.create_rectangle(col*self.cellSize, row*self.cellSize,
                                         (col+1)*self.cellSize, (row+1) *
                                         self.cellSize,
-                                        fill=vertex.getColor())
+                                        fill=vertex.getColor(), outline=vertex.getColor())
 
 
-# def testMaze():
-#     print('Testing Maze Class...')
-#     m = Maze(5, 5, 'prim')
-#     m.generate()
-#     print('Passed!')
+def testMaze(app):
+    print('Testing Maze Class...')
+    app.m = Maze(5, 5, 'prim', app.height/9)
+    app.m.generate()
+    print2dList(app.m.L)
+    print('Passed!')
 
 
-# testMaze()
+def appStarted(app):
+    testMaze(app)
+
+
+def keyPressed(app, event):
+    if event.key == "r":
+        testMaze(app)
+
+
+def redrawAll(app, canvas):
+    app.m.renderMinimap(canvas)
+
+
+runApp(width=800, height=800)
