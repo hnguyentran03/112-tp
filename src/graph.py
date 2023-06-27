@@ -157,32 +157,35 @@ class Maze(Graph):
     # Taken from https://en.wikipedia.org/wiki/Prim%27s_algorithm
     def generatePrim(self):
         visited = set()
-        frontier = []
+        frontier = set()
         start = (random.randrange(0, self.rows),
                  random.randrange(0, self.cols))
 
-        frontier.append(start)
+        frontier.add(start)
 
         # While there are still walls
         while frontier:
-            vertex = row, col = random.choice(frontier)
+            vertex = (row, col) = random.choice(list(frontier))
+
             frontier.remove(vertex)
             visited.add(vertex)
 
             # Find all neighboring walls
             neighbors = []
             for drow, dcol in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
-                neighbor = nrow, ncol = (row + drow, col + dcol)
-                if 0 <= nrow < self.rows and 0 <= ncol < self.cols and neighbor not in visited:
-                    frontier.append(neighbor)
-                    neighbors.append(neighbor)
+                neighbor = nrow, ncol = row + drow, col + dcol
+                if 0 <= nrow < self.rows and 0 <= ncol < self.cols:
+                    if neighbor not in visited:
+                        frontier.add(neighbor)
+                    else:
+                        neighbors.append(neighbor)
 
             # If there are walls, break one of them down
             # Otherwise, do nothing
             if neighbors:
-                nextVertex = random.choice(neighbors)
-                self.addEdge(vertex, nextVertex)
-                self.addEdge(nextVertex, vertex)
+                prevVertex = random.choice(neighbors)
+                self.addEdge(vertex, prevVertex)
+                self.addEdge(prevVertex, vertex)
 
     def generateKruskal(self):
         pass
@@ -206,11 +209,11 @@ class Maze(Graph):
 
 
 def testMaze(app):
-    print('Testing Maze Class...')
+    print('Generating New Maze...')
     app.m = Maze(5, 5, 'prim', app.height/9)
     app.m.generate()
     print2dList(app.m.L)
-    print('Passed!')
+    print('Done!')
 
 
 def appStarted(app):
@@ -226,4 +229,7 @@ def redrawAll(app, canvas):
     app.m.renderMinimap(canvas)
 
 
-runApp(width=800, height=800)
+if __name__ == '__main__':
+    print('Testing graph.py...')
+    runApp(width=800, height=800)
+    print("Passed!")
